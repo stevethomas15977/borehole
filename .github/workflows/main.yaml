@@ -54,10 +54,10 @@ jobs:
 
       - name: Run the Terraform command
         run: |
-          if [ "${{ github.event.inputs.environment }}" == "plan" ]; then
+          if [ "${{ github.event.inputs.command }}" == "plan" ]; then
             terraform plan
-          elif [ "${{ github.event.inputs.environment }}" == "apply" ]; then
+          elif [ "${{ github.event.inputs.command }}" == "apply" ]; then
             terraform apply -auto-approve
-          elif [ "${{ github.event.inputs.environment }}" == "destroy" ]; then
+          elif [ "${{ github.event.inputs.command }}" == "destroy" ]; then
             terraform destroy -auto-approve
           fi
