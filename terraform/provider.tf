@@ -11,22 +11,22 @@ terraform {
   }
 
   backend "s3" {
-    bucket         = "${var.app}-terraform-state-${var.env}" 
-    key            = "${var.env}/terraform.tfstate"      
-    region         = "${var.region}"                      
+    bucket         = "${locals.app}-terraform-state-${locals.env}" 
+    key            = "${locals.env}/terraform.tfstate"      
+    region         = "${locals.region}"                      
     encrypt        = true
-    dynamodb_table = "${var.app}-terraform-lock-${var.env}"
+    dynamodb_table = "${locals.app}-terraform-lock-${locals.env}"
   }
 }
 
 provider "aws" {
-    region = "${var.region}"
+    region = "${locals.region}"
     default_tags {
         tags = {
-        Project      = "${var.app}"
-        Environment = "${var.env}"
+        Project      = "${locals.app}"
+        Environment = "${locals.env}"
         CreatedBy    = "Terraform"
-        SourceRepo   = "git@github.com:${var.github_org}/${var.app}.git"
+        SourceRepo   = "git@github.com:${locals.github_org}/${locals.app}.git"
         }
     }
 }
