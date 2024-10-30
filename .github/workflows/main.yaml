@@ -1,4 +1,4 @@
-name: Deploy AFE NiceGUI Web Application
+name: Deploy AFE Application
 
 on:
   workflow_dispatch:
