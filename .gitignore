@@ -14,6 +14,10 @@ crash.*.log
 # control as they are data points which are potentially sensitive and subject 
 # to change depending on the environment.
 *.tfvars
+# But don't ignore specific backend configuration files
+!backend-dev.tfvars
+!backend-prod.tfvars
+
 *.tfvars.json
 
 # Ignore override files as they are usually used to override resources locally and so
