@@ -54,8 +54,6 @@ jobs:
 
       - name: Run the Terraform command
         run: |
-          cd terraform
-          terraform init
           if [ "${{ github.event.inputs.environment }}" == "plan" ]; then
             terraform plan
           elif [ "${{ github.event.inputs.environment }}" == "apply" ]; then
