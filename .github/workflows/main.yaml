@@ -1,0 +1,58 @@
+name: Deploy AFE NiceGUI Web Application
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Select the environment to deploy to'
+        required: true
+        default: 'dev'
+        type: choice
+        options:
+          - prod
+          - dev
+      command:
+        description: 'Select the command to run'
+        required: true
+        default: 'plan'
+        type: choice
+        options:
+          - plan
+          - apply
+          - destroy
+
+env:
+  AWS_DEFAULT_REGION: ${{ vars.AWS_DEFAULT_REGION }}
+
+jobs:
+  deploy:
+    runs-on: self-hosted
+
+    steps:
+      - name: Set environment variables based on input
+        id: set_env_vars
+        run: |
+          if [ "${{ github.event.inputs.environment }}" == "prod" ]; then
+            echo "AWS_ACCESS_KEY_ID=${{ secrets.PROD_AWS_ACCESS_KEY_ID }}" >> $GITHUB_ENV
+            echo "AWS_SECRET_ACCESS_KEY=${{ secrets.PROD_AWS_SECRET_ACCESS_KEY }}" >> $GITHUB_ENV
+          else
+            echo "AWS_ACCESS_KEY_ID=${{ secrets.DEV_AWS_ACCESS_KEY_ID }}" >> $GITHUB_ENV
+            echo "AWS_SECRET_ACCESS_KEY=${{ secrets.DEV_AWS_SECRET_ACCESS_KEY }}" >> $GITHUB_ENV
+          fi
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Deploy to AWS Lightsail
+        run: |
+          echo "Start deployment"
+          cd terraform
+          terraform init
+          if [ "${{ github.event.inputs.environment }}" == "plan" ]; then
+            terraform plan
+          elif [ "${{ github.event.inputs.environment }}" == "apply" ]; then
+            terraform apply -auto-approve
+          elif [ "${{ github.event.inputs.environment }}" == "destroy" ]; then
+            terraform destroy -auto-approve
+          fi
+          echo "Completed deployment"
