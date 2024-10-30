@@ -43,9 +43,17 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Deploy to AWS Lightsail
+      - name: Initialize Terraform
         run: |
-          echo "Start deployment"
+          cd terraform
+          if [ "${{ github.event.inputs.environment }}" == "prod" ]; then
+              terraform init -backend-config=backend-prod.tfvars
+          else
+              terraform init -backend-config=backend-dev.tfvars
+          fi
+
+      - name: Run the Terraform command
+        run: |
           cd terraform
           terraform init
           if [ "${{ github.event.inputs.environment }}" == "plan" ]; then
@@ -55,4 +63,3 @@ jobs:
           elif [ "${{ github.event.inputs.environment }}" == "destroy" ]; then
             terraform destroy -auto-approve
           fi
-          echo "Completed deployment"
