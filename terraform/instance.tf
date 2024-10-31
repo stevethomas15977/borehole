@@ -100,5 +100,74 @@ resource "aws_lightsail_instance" "instance" {
         pip install pipenv
         pipenv sync
 
+        # Create the Gunicorn service file and start the service
+        sudo sh -c "cat > /etc/systemd/system/gunicorn.service" <<EOT
+        [Unit]
+        Description=gunicorn daemon
+        After=network.target
+
+        [Service]
+        User=ubuntu
+        Group=ubuntu
+        WorkingDirectory=$APP_PATH
+        ExecStart=$APP_PATH/venv/bin/gunicorn --workers 3 --bind 0.0.0.0:8000 wsgi:app
+
+        [Install]
+        WantedBy=multi-user.target
+        EOT
+
+        sudo systemctl daemon-reload
+        sudo systemctl start gunicorn
+        sudo systemctl enable gunicorn
+        sudo systemctl status gunicorn --no-pager
+
+        # Remove nginx default site if it exists
+        if [ -e /etc/nginx/sites-enabled/default ]; then
+        sudo rm /etc/nginx/sites-enabled/default
+        fi
+
+        if [ -e /etc/nginx/sites-available/default ]; then
+        sudo rm /etc/nginx/sites-available/default
+        fi
+
+        # Create gninx site file and restart nginx
+        sudo sh -c "cat > /etc/nginx/sites-available/$APP" <<EOH
+        server {
+            listen $HTTP_PORT;
+
+            server_name _;
+
+            client_max_body_size 25M;
+            
+            location / {
+                auth_basic "Restricted Access";
+                auth_basic_user_file /etc/nginx/.htpasswd;
+                proxy_pass http://127.0.0.1:8000;
+                proxy_set_header Host \$host;
+                proxy_set_header X-Real-IP \$remote_addr;
+                proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+                proxy_set_header X-Forwarded-Proto \$scheme;
+            }
+
+            location /health {
+                access_log off;
+                return 200 "OK";
+                add_header Content-Type text/plain;
+            }
+        }
+        EOH
+
+        sudo touch /etc/nginx/.htpasswd
+        sudo chmod 644 /etc/nginx/.htpasswd
+        sudo chown www-data:www-data /etc/nginx/.htpasswd
+        echo $PASSWORD | sudo htpasswd -ci /etc/nginx/.htpasswd $USERNAME
+
+        sudo nginx -t
+        sudo ln -s /etc/nginx/sites-available/$APP /etc/nginx/sites-enabled
+        sudo systemctl restart nginx 
+
+        touch /var/log/user_data_complete
+        chmod 644 /var/log/user_data_complete
+        
     EOF
 }
