@@ -41,8 +41,8 @@ jobs:
             echo "EC2_INSTANCE_NAME=afe-dev" >> $GITHUB_ENV
           fi
 
-          echo $TARGET_GROUP_ARN
-          echo $EC2_INSTANCE_NAME
+          echo $GITHUB_ENV.TARGET_GROUP_ARN
+          echo $GITHUB_ENV.EC2_INSTANCE_NAME
 
       - name: Checkout
         uses: actions/checkout@v4
