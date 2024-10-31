@@ -23,7 +23,6 @@ on:
 
 env:
   AWS_DEFAULT_REGION: ${{ vars.AWS_DEFAULT_REGION }}
-  APP_SECRET: ${{ secrets.APP_SECRET }}
 
 jobs:
   deploy:
@@ -34,6 +33,7 @@ jobs:
         id: set_env_vars
         run: |
           echo "TF_VAR_ghpat=${{ secrets.AFE_GH_PAT }}" >> $GITHUB_ENV
+          echo "TF_VAR_appsecret=${{ secrets.APP_SECRET }}" >> $GITHUB_ENV
           if [ "${{ github.event.inputs.environment }}" == "prod" ]; then
             echo "AWS_ACCESS_KEY_ID=${{ secrets.PROD_AWS_ACCESS_KEY_ID }}" >> $GITHUB_ENV
             echo "AWS_SECRET_ACCESS_KEY=${{ secrets.PROD_AWS_SECRET_ACCESS_KEY }}" >> $GITHUB_ENV
@@ -47,7 +47,6 @@ jobs:
 
       - name: Run Terraform commands
         run: |
-          echo "TF_VAR_ghpat is set to: $TF_VAR_ghpat"
           cd terraform
           terraform init -backend-config=backend-dev.tfvars
           if [ "${{ github.event.inputs.command }}" == "plan" ]; then

@@ -14,3 +14,8 @@ variable "ghpat" {
     description = "GitHub Personal Access Token"
     type        = string
 }
+
+variable "appsecret" {
+    description = "Application secret"
+    type        = string
+}

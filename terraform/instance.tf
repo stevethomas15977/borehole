@@ -32,8 +32,9 @@ resource "aws_lightsail_instance" "instance" {
 
         # Set up the environment variables
         export GH_PAT="${var.ghpat}"
-        echo "export GH_PAT=${var.ghpat}"
+        export APP_SECRET="${var.appsecret}"
         export APP="afe"
+        export ENV="prod"
         export APP_ROOT="/home/ubuntu"
         export AFE_PATH=$APP_ROOT/afe
         export APP_PATH=$AFE_PATH/app
@@ -45,6 +46,7 @@ resource "aws_lightsail_instance" "instance" {
         # Create project directory
         mkdir -p $AFE_PATH
         mkdir -p $APP_PATH
+        mkdir -p $GEOJSON_PATH
         mkdir -p $PROJECTS_PATH
 
         # Clone the GitHub repository
@@ -58,6 +60,45 @@ resource "aws_lightsail_instance" "instance" {
 
         # Adjust permissions
         chown -R ubuntu:ubuntu $AFE_PATH
+
+        cd $APP_PATH
+
+        # Set up the environment variables
+        export HTTP_PORT=80
+        export PASSWORD=$APP_SECRET
+        export ENV="prod"
+
+        sh -c "cat > $APP_PATH/.env" <<EOG
+        VERSION="1.7.0"
+        ENV="$ENV"
+        APP="$APP"
+        APP_ROOT="$APP_ROOT"
+        AFE_PATH=$AFE_PATH
+        APP_PATH="$APP_PATH"
+        PROJECTS_PATH="$PROJECTS_PATH"
+        GEOJSON_PATH="$AFE_PATH/$S3_FOLDER_NAME"
+        CODEVELOPMENT_FIRST_PRODUCTION_DATE_DAYS_THRESHOLD=180
+        MAX_DISTANCE_THRESHOLD=8000
+        HORIZONTAL_DISTANCE_THRESHOLD=1600
+        VERTICAL_DISTANCE_THRESHOLD=500
+        LATERAL_LENGTH_THRESHOLD=.8
+        HYPOTENUSE_DISTANCE_THRESHOLD=1800
+        DEPTH_DISTANCE_THRESHOLD=1500
+        TEXAS_LAND_SURVEY_SYSTEM_DATABASE="texas_land_survey_system.db"
+        NEW_MEXICO_LAND_SURVEY_SYSTEM_DATABASE="new_mexico_land_survey_system.db"
+        NM_SECTION_COLUMN="FRSTDIVLAB"
+        TX_ABSTRACT_COLUMN="ABSTRACT_L"
+        USERNAME="afe-admin"
+        PASSWORD="$APP_SECRET"
+        S3_BUCKET_NAME="$S3_BUCKET_NAME"
+        GEOJSON_PATH="$GEOJSON_PATH"
+        EOG
+
+        # Set up the virtual environment and install dependencies
+        python3 -m venv venv
+        . venv/bin/activate
+        pip install pipenv
+        pipenv sync
 
     EOF
 }
