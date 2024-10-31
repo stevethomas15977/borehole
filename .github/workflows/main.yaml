@@ -48,4 +48,6 @@ jobs:
         run: |
           cd terraform
           terraform init -backend-config=backend-dev.tfvars
-          terraform plan
+          if [ "${{ github.event.inputs.command }}" == "plan" ]; then
+            terraform plan
+          fi
