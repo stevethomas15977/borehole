@@ -34,14 +34,12 @@ jobs:
         run: |
 
           if [ "${{ github.event.inputs.environment }}" == "prod" ]; then
-            echo "TARGET_GROUP_ARN=arn:aws:elasticloadbalancing:us-east-1:867089037134:targetgroup/afe-prod/d86c3fb58d495135" >> $GITHUB_ENV
-            echo "EC2_INSTANCE_NAME=afe-prod" >> $GITHUB_ENV
+            echo ${{secrets.PROD_AWS_ACCESS_KEY_ID}}
+            echo ${{secrets.PROD_AWS_SECRET_ACCESS_KEY}}
           else
-            echo "TARGET_GROUP_ARN=arn:aws:elasticloadbalancing:us-east-1:867089037134:targetgroup/afe-dev/00f1f0044374f784" >> $GITHUB_ENV
-            echo "EC2_INSTANCE_NAME=afe-dev" >> $GITHUB_ENV
+            echo ${{secrets.DEV_AWS_ACCESS_KEY_ID}}
+            echo ${{secrets.DEV_AWS_SECRET_ACCESS_KEY}}
           fi
-
-          echo $GITHUB_ENV
 
       - name: Checkout
         uses: actions/checkout@v4
