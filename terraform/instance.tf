@@ -31,8 +31,8 @@ resource "aws_lightsail_instance" "instance" {
         aws configure set region "us-east-1" --profile lightsail
 
         # Set up the environment variables
-        export GH_PATH="${var.ghpat}"
-        echo "export GH_PATH=${var.ghpat}"
+        export GH_PAT="${var.ghpat}"
+        echo "export GH_PAT=${var.ghpat}"
         export APP="afe"
         export APP_ROOT="/home/ubuntu"
         export AFE_PATH=$APP_ROOT/afe
@@ -48,9 +48,9 @@ resource "aws_lightsail_instance" "instance" {
         mkdir -p $PROJECTS_PATH
 
         # Clone the GitHub repository
-        mkidr -p /tmp/afe
+        mkdir -p /tmp/afe
         cd /tmp/afe
-        git clone https://$GH_PATH@github.com/stevethomas15977/afe.git .
+        git clone https://$GH_PAT@github.com/stevethomas15977/afe.git .
         git checkout main
 
         cp -R /tmp/afe/app/* $AFE_PATH
