@@ -20,6 +20,13 @@ resource "aws_lightsail_instance" "instance" {
         pipx ensurepath
         pipx install pipenv
 
+        # Install AWS CLI
+        curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+        unzip awscliv2.zip
+        sudo ./aws/install
+        rm -rf aws
+        rm awscliv2.zip
+        
         aws configure set aws_access_key_id ${aws_lightsail_bucket_access_key.bucket-access-key.access_key_id} --profile lightsail
         aws configure set aws_secret_access_key ${aws_lightsail_bucket_access_key.bucket-access-key.secret_access_key} --profile lightsail
         aws configure set region "us-east-1" --profile lightsail
