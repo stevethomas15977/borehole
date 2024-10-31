@@ -51,3 +51,9 @@ jobs:
           if [ "${{ github.event.inputs.command }}" == "plan" ]; then
             terraform plan
           fi
+          if [ "${{ github.event.inputs.command }}" == "apply" ]; then
+            terraform apply -auto-approve
+          fi
+          if [ "${{ github.event.inputs.command }}" == "destroy" ]; then
+            terraform destroy -auto-approve
+          fi
