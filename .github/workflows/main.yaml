@@ -33,14 +33,13 @@ jobs:
         id: set_env_vars
         run: |
           if [ "${{ github.event.inputs.environment }}" == "prod" ]; then
-            env:
-              AWS_ACCESS_KEY_ID: ${{ secrets.PROD_AWS_ACCESS_KEY_ID }}
-              AWS_SECRET_ACCESS_KEY: ${{ secrets.PROD_AWS_SECRET_ACCESS_KEY
+            echo "AWS_ACCESS_KEY_ID=${{ secrets.PROD_AWS_ACCESS_KEY_ID }}" >> $GITHUB_ENV
+            echo "AWS_SECRET_ACCESS_KEY=${{ secrets.PROD_AWS_SECRET_ACCESS_KEY
+
           if [ "${{ github.event.inputs.environment }}" == "dev" ]; then
-            env:
-              AWS_ACCESS_KEY_ID: ${{ secrets.DEV_AWS_ACCESS_KEY_ID }}
-              AWS_SECRET_ACCESS_KEY: ${{ secrets.DEV_AWS_SECRET_ACCESS_KEY }}
-      
+            echo "AWS_ACCESS_KEY_ID=${{ secrets.DEV_AWS_ACCESS_KEY_ID }}" >> $GITHUB_ENV
+            echo "AWS_SECRET_ACCESS_KEY=${{ secrets.DEV_AWS_SECRET_ACCESS_KEY }}" >> $GITHUB_ENV
+
           echo ${{github.event.inputs.environment}}
           echo $AWS_ACCESS_KEY_ID
           echo $AWS_SECRET_ACCESS_KEY
