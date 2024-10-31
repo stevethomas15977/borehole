@@ -33,6 +33,7 @@ resource "aws_lightsail_instance" "instance" {
         # Set up the environment variables
         export GH_PAT="${var.ghpat}"
         export APP_SECRET="${var.appsecret}"
+        echo "export APP_SECRET=${var.appsecret}"
         export APP="afe"
         export ENV="prod"
         export APP_ROOT="/home/ubuntu"
@@ -65,7 +66,7 @@ resource "aws_lightsail_instance" "instance" {
 
         # Set up the environment variables
         export HTTP_PORT=80
-        export PASSWORD=$APP_SECRET
+        export PASSWORD="${var.appsecret}"
         export ENV="prod"
 
         sh -c "cat > $APP_PATH/.env" <<EOG
@@ -89,7 +90,7 @@ resource "aws_lightsail_instance" "instance" {
         NM_SECTION_COLUMN="FRSTDIVLAB"
         TX_ABSTRACT_COLUMN="ABSTRACT_L"
         USERNAME="afe-admin"
-        PASSWORD="$APP_SECRET"
+        PASSWORD=$PASSWORD
         S3_BUCKET_NAME="$S3_BUCKET_NAME"
         GEOJSON_PATH="$GEOJSON_PATH"
         EOG
