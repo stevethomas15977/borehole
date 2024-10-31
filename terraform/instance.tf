@@ -48,8 +48,9 @@ resource "aws_lightsail_instance" "instance" {
         mkdir -p $PROJECTS_PATH
 
         # Clone the GitHub repository
-        cd /tmp
-        git clone https://$GH_PATH@github.com/stevethomas15977/afe.git
+        mkidr -p /tmp/afe
+        cd /tmp/afe
+        git clone https://$GH_PATH@github.com/stevethomas15977/afe.git .
         git checkout main
 
         cp -R /tmp/afe/app/* $AFE_PATH
