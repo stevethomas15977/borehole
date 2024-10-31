@@ -52,7 +52,7 @@ jobs:
             terraform plan 
           fi
           if [ "${{ github.event.inputs.command }}" == "apply" ]; then
-            terraform apply -auto-approve -var gh_pat=${{ secrets.AFE_GH_PAT }}
+            terraform apply -auto-approve -var gh_pat="${{ secrets.AFE_GH_PAT }}"
           fi
           if [ "${{ github.event.inputs.command }}" == "destroy" ]; then
             terraform destroy -auto-approve
