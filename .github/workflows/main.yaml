@@ -6,7 +6,7 @@ on:
       environment:
         description: 'Select the environment to deploy to'
         required: true
-        default: 'dev'
+        default: dev
         type: choice
         options:
           - prod
@@ -14,7 +14,7 @@ on:
       command:
         description: 'Select the command to run'
         required: true
-        default: 'plan'
+        default: plan
         type: choice
         options:
           - plan
@@ -43,21 +43,23 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Initialize Terraform
+      - name: Run Terraform commands
         run: |
           cd terraform
           if [ "${{ github.event.inputs.environment }}" == "prod" ]; then
               terraform init -backend-config=backend-prod.tfvars
+              if [ "${{ github.event.inputs.command }}" == "plan" ]; then
+                terraform plan
+              elif [ "${{ github.event.inputs.command }}" == "apply" ]; then
+                terraform apply -auto-approve
+              elif [ "${{ github.event.inputs.command }}" == "destroy" ]; then
+                terraform destroy -auto-approve
           else
               terraform init -backend-config=backend-dev.tfvars
-          fi
-
-      - name: Run the Terraform command
-        run: |
-          if [ "${{ github.event.inputs.command }}" == "plan" ]; then
-            terraform plan
-          elif [ "${{ github.event.inputs.command }}" == "apply" ]; then
-            terraform apply -auto-approve
-          elif [ "${{ github.event.inputs.command }}" == "destroy" ]; then
-            terraform destroy -auto-approve
+              if [ "${{ github.event.inputs.command }}" == "plan" ]; then
+                terraform plan
+              elif [ "${{ github.event.inputs.command }}" == "apply" ]; then
+                terraform apply -auto-approve
+              elif [ "${{ github.event.inputs.command }}" == "destroy" ]; then
+                terraform destroy -auto-approve
           fi
