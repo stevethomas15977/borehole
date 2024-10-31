@@ -1,0 +1,46 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+flask = "==3.0.3"
+flask-httpauth = "==4.8.0"
+folium = "==0.17.0"
+geopandas = "==1.0.1"
+matplotlib = "*"
+numpy = "==2.0.0"
+openpyxl = "==3.1.5"
+pandas = "==2.2.2"
+pydash = "==8.0.1"
+python-dotenv = "==1.0.1"
+python-dateutil = "==2.9.0.post0"
+randomcolor = "==0.4.4.6"
+utm = "==0.7.0"
+werkzeug = "==3.0.3"
+wordcloud = "==1.9.3"
+gunicorn = "*"
+pypdf2 = "*"
+jsonify = "*"
+pdfquery = "*"
+pytesseract = "*"
+flask-autoindex = "*"
+pylint = "*"
+langchain = "*"
+openai = "*"
+opencv-python = "*"
+pymupdf = "*"
+selenium = "*"
+isort = "*"
+fiona = "*"
+ncat-api = "*"
+nicegui = "*"
+regex = "*"
+boto3 = "*"
+pyarrow = "*"
+mplcursors = "*"
+
+[dev-packages]
+
+[requires]
+python_version = "3.12"

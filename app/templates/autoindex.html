@@ -1,0 +1,19 @@
+{% extends '__autoindex__/autoindex.html' %}
+
+{% block header %}
+  {{ super() }}
+  <script>
+    setTimeout(function(){
+      window.location.reload(1);
+    }, 20000);
+  </script>
+
+<div style="width: 1000px; margin: 30px auto;">
+  <h2>AFE Analysis</h2>
+  <br>
+  <a href="/">Home</a>
+{% endblock %}
+
+{% block footer %}
+  </div>
+{% endblock %}

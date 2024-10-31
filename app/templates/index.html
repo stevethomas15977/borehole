@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ app }} - {{ version }} - {{ server }}</title>
+</head>
+<body>
+    <h2>Welcome to {{ app }}</h2>
+    <p>Version: {{ version }} running on AWS Lightsail</p>
+
+    <p>Features of this version calculate, determine and create the following:</p>
+    <ul>
+        <li>Creation of the Well Identifcation Excel Spreadsheet</li>
+        <li>Optional creation of Gun Barrel Plot Excel Spreadsheet</li>
+        <li>Optional creation of Cross Plot Excel Spreadsheet</li>
+        <li>Optional validation of Target Well Information Spreadsheet</li>
+        <li>Realtime feedback on running, error, and completed status</li>
+    </ul>
+
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <ul>
+            {% for message in messages %}
+                <li style="color: red;">{{ message }}</li>
+            {% endfor %}
+            </ul>
+        {% endif %}
+    {% endwith %}
+    <form method="post" action="/upload" enctype="multipart/form-data">
+        <label for="project">Project Name:</label>
+        <input type="text" id="project" name="project" required><br><br>
+
+        <label for="well-data">Well Data (.xlsx):</label>
+        <input type="file" id="well-data" name="well-data" accept=".xlsx"><br><br>
+        
+        <label for="survey-data">Survey Data (.xlsx):</label>
+        <input type="file" id="survey-data" name="survey-data" accept=".xlsx"><br>
+
+        <p>Optional: Attach the Target Well Information Excel spreadsheet.</p>
+        <label for="target-well-information">Target Well Information (.xlsx):</label>
+        <input type="file" id="target-well-information" name="target-well-information" accept=".xlsx"><br><br>
+        <input type="submit" value="Upload and Launch">
+    </form>
+    <br>
+    <a href="/projects" target="_blank">Click here to view projects</a> 
+    <br><br>
+    <a href="https://stevethomascpapublic.s3.amazonaws.com/target_well_information-TEMPLATE.xlsx" target="_blank">
+        Download a copy of Target Well Information Template v1.6.x
+    </a>
+</body>
+</html>

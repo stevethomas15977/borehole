@@ -23,6 +23,8 @@ on:
 
 env:
   AWS_DEFAULT_REGION: ${{ vars.AWS_DEFAULT_REGION }}
+  AFE_GH_PAT : ${{ secrets.AFE_GH_PAT }}
+  APP_SECRET: ${{ secrets.APP_SECRET }}
 
 jobs:
   deploy:
