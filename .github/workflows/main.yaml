@@ -47,20 +47,4 @@ jobs:
       - name: Run Terraform commands
         run: |
           cd terraform
-          if [ "${{ github.event.inputs.environment }}" == "prod" ]; then
-              terraform init -backend-config=backend-prod.tfvars
-              if [ "${{ github.event.inputs.command }}" == "plan" ]; then
-                terraform plan
-              elif [ "${{ github.event.inputs.command }}" == "apply" ]; then
-                terraform apply -auto-approve
-              elif [ "${{ github.event.inputs.command }}" == "destroy" ]; then
-                terraform destroy -auto-approve
-          else
-              terraform init -backend-config=backend-dev.tfvars
-              if [ "${{ github.event.inputs.command }}" == "plan" ]; then
-                terraform plan
-              elif [ "${{ github.event.inputs.command }}" == "apply" ]; then
-                terraform apply -auto-approve
-              elif [ "${{ github.event.inputs.command }}" == "destroy" ]; then
-                terraform destroy -auto-approve
-          fi
+          terraform init -backend-config=backend-dev.tfvars
