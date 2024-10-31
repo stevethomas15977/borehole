@@ -34,7 +34,7 @@ resource "aws_lightsail_instance" "instance" {
         export GH_PAT="${var.ghpat}"
         export APP_SECRET="${var.appsecret}"
         export APP="afe"
-        export ENV="prod"
+        export ENV="Production"
         export APP_ROOT="/home/ubuntu"
         export AFE_PATH=$APP_ROOT/afe
         export APP_PATH=$AFE_PATH/app
