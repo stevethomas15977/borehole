@@ -4,7 +4,7 @@ resource "aws_lightsail_key_pair" "key-pair" {
 }
 
 # Lightsail Instance
-resource "aws_lightsail_instance" "offset-well-identification-lightsail-instance" {
+resource "aws_lightsail_instance" "instance" {
   name                  = "offset-well-identification-lightsail-instance"
     availability_zone   = "us-east-1a"
     blueprint_id        = "ubuntu_24_04"
@@ -20,8 +20,8 @@ resource "aws_lightsail_instance" "offset-well-identification-lightsail-instance
         pipx ensurepath
         pipx install pipenv
 
-        aws configure set aws_access_key_id ${aws_lightsail_bucket_access_key.offset-well-identification-lightsail-bucket-access-key.access_key_id} --profile lightsail
-        aws configure set aws_secret_access_key ${aws_lightsail_bucket_access_key.offset-well-identification-lightsail-bucket-access-key.secret_access_key} --profile lightsail
+        aws configure set aws_access_key_id ${aws_lightsail_bucket_access_key.bucket-access-key.access_key_id} --profile lightsail
+        aws configure set aws_secret_access_key ${aws_lightsail_bucket_access_key.bucket-access-key.secret_access_key} --profile lightsail
         aws configure set region "us-east-1" --profile lightsail
 
         # Set up the environment variables
