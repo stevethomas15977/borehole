@@ -55,7 +55,7 @@ resource "aws_lightsail_instance" "instance" {
         git clone https://$GH_PAT@github.com/stevethomas15977/afe.git .
         git checkout main
 
-        cp -R /tmp/afe/app/* $AFE_PATH
+        cp -R /tmp/afe/app/* $APP_PATH
         cp -R /tmp/afe/plss/* $GEOJSON_PATH
 
         # Adjust permissions
@@ -168,6 +168,6 @@ resource "aws_lightsail_instance" "instance" {
 
         touch /var/log/user_data_complete
         chmod 644 /var/log/user_data_complete
-        
+
     EOF
 }
