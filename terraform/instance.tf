@@ -9,7 +9,7 @@ resource "aws_lightsail_instance" "instance" {
     availability_zone   = "us-east-1a"
     blueprint_id        = "ubuntu_24_04"
     bundle_id           = "medium_3_0" 
-    key_pair_name       = aws_lightsail_key_pair.key-pair.name 
+    key_pair_name       = aws_lightsail_key_pair.key-pair.name
     user_data = <<-EOF
         #!/bin/bash
         apt-get update -y
@@ -31,6 +31,7 @@ resource "aws_lightsail_instance" "instance" {
         aws configure set region "us-east-1" --profile lightsail
 
         # Set up the environment variables
+        export GH_PAT="${var.gh_pat}"
         export APP="afe"
         export APP_ROOT="/home/ubuntu"
         export AFE_PATH=$APP_ROOT/afe
@@ -47,7 +48,7 @@ resource "aws_lightsail_instance" "instance" {
 
         # Clone the GitHub repository
         cd /tmp
-        git clone https://$AFE_GH_PAT@github.com/stevethomas15977/afe.git
+        git clone https://$GH_PATH@github.com/stevethomas15977/afe.git
         git checkout main
 
         cp -R /tmp/afe/app/* $AFE_PATH
@@ -55,6 +56,6 @@ resource "aws_lightsail_instance" "instance" {
 
         # Adjust permissions
         chown -R ubuntu:ubuntu $AFE_PATH
-        
+
     EOF
 }

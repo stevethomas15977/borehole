@@ -9,3 +9,8 @@ variable "app" {
     type        = string
      default     = "afe"
 }
+
+variable "gh_pat" {
+    description = "GitHub Personal Access Token"
+    type        = string
+}

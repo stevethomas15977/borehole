@@ -34,7 +34,6 @@ jobs:
       - name: Set environment variables based on input
         id: set_env_vars
         run: |
-
           if [ "${{ github.event.inputs.environment }}" == "prod" ]; then
             echo "AWS_ACCESS_KEY_ID=${{ secrets.PROD_AWS_ACCESS_KEY_ID }}" >> $GITHUB_ENV
             echo "AWS_SECRET_ACCESS_KEY=${{ secrets.PROD_AWS_SECRET_ACCESS_KEY }}" >> $GITHUB_ENV
@@ -54,7 +53,7 @@ jobs:
             terraform plan
           fi
           if [ "${{ github.event.inputs.command }}" == "apply" ]; then
-            terraform apply -auto-approve
+            terraform apply -auto-approve TF_VAR-gh_pat=${{ secrets.AFE_GH_PAT }}
           fi
           if [ "${{ github.event.inputs.command }}" == "destroy" ]; then
             terraform destroy -auto-approve
