@@ -31,7 +31,7 @@ resource "aws_lightsail_instance" "instance" {
         aws configure set region "us-east-1" --profile lightsail
 
         # Set up the environment variables
-        export GH_PAT="${var.gh_pat}"
+        export GH_PAT="${var.ghpat}"
         export APP="afe"
         export APP_ROOT="/home/ubuntu"
         export AFE_PATH=$APP_ROOT/afe
