@@ -48,3 +48,4 @@ jobs:
         run: |
           cd terraform
           terraform init -backend-config=backend-dev.tfvars
+          terraform plan
