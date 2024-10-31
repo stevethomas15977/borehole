@@ -6,20 +6,20 @@ on:
       environment:
         description: 'Select the environment to deploy to'
         required: true
-        default: dev
+        default: "dev"
         type: choice
         options:
-          - prod
-          - dev
+          - "prod"
+          - "dev"
       command:
         description: 'Select the command to run'
         required: true
-        default: plan
+        default: "plan"
         type: choice
         options:
-          - plan
-          - apply
-          - destroy
+          - "plan"
+          - "apply"
+          - "destroy"
 
 env:
   AWS_DEFAULT_REGION: ${{ vars.AWS_DEFAULT_REGION }}
