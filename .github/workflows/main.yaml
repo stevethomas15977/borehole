@@ -32,18 +32,24 @@ jobs:
       - name: Set environment variables based on input
         id: set_env_vars
         run: |
+          # if [ "${{ github.event.inputs.environment }}" == "prod" ]; then
+          #   echo "AWS_ACCESS_KEY_ID=${{ secrets.PROD_AWS_ACCESS_KEY_ID }}" >> $GITHUB_ENV
+          #   echo "AWS_SECRET_ACCESS_KEY=${{ secrets.PROD_AWS_SECRET_ACCESS_KEY
+
+          # if [ "${{ github.event.inputs.environment }}" == "dev" ]; then
+          #   echo "AWS_ACCESS_KEY_ID=${{ secrets.DEV_AWS_ACCESS_KEY_ID }}" >> $GITHUB_ENV
+          #   echo "AWS_SECRET_ACCESS_KEY=${{ secrets.DEV_AWS_SECRET_ACCESS_KEY }}" >> $GITHUB_ENV
+          
           if [ "${{ github.event.inputs.environment }}" == "prod" ]; then
-            echo "AWS_ACCESS_KEY_ID=${{ secrets.PROD_AWS_ACCESS_KEY_ID }}" >> $GITHUB_ENV
-            echo "AWS_SECRET_ACCESS_KEY=${{ secrets.PROD_AWS_SECRET_ACCESS_KEY
+            echo "TARGET_GROUP_ARN=arn:aws:elasticloadbalancing:us-east-1:867089037134:targetgroup/afe-prod/d86c3fb58d495135" >> $GITHUB_ENV
+            echo "EC2_INSTANCE_NAME=afe-prod" >> $GITHUB_ENV
+          else
+            echo "TARGET_GROUP_ARN=arn:aws:elasticloadbalancing:us-east-1:867089037134:targetgroup/afe-dev/00f1f0044374f784" >> $GITHUB_ENV
+            echo "EC2_INSTANCE_NAME=afe-dev" >> $GITHUB_ENV
+          fi
 
-          if [ "${{ github.event.inputs.environment }}" == "dev" ]; then
-            echo "AWS_ACCESS_KEY_ID=${{ secrets.DEV_AWS_ACCESS_KEY_ID }}" >> $GITHUB_ENV
-            echo "AWS_SECRET_ACCESS_KEY=${{ secrets.DEV_AWS_SECRET_ACCESS_KEY }}" >> $GITHUB_ENV
-
-          echo ${{github.event.inputs.environment}}
-          echo $AWS_ACCESS_KEY_ID
-          echo $AWS_SECRET_ACCESS_KEY
-          echo $AWS_DEFAULT_REGION
+          echo $TARGET_GROUP_ARN
+          echo $EC2_INSTANCE_NAME
 
       - name: Checkout
         uses: actions/checkout@v4
