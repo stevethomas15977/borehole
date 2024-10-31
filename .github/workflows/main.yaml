@@ -32,14 +32,7 @@ jobs:
       - name: Set environment variables based on input
         id: set_env_vars
         run: |
-          # if [ "${{ github.event.inputs.environment }}" == "prod" ]; then
-          #   echo "AWS_ACCESS_KEY_ID=${{ secrets.PROD_AWS_ACCESS_KEY_ID }}" >> $GITHUB_ENV
-          #   echo "AWS_SECRET_ACCESS_KEY=${{ secrets.PROD_AWS_SECRET_ACCESS_KEY
 
-          # if [ "${{ github.event.inputs.environment }}" == "dev" ]; then
-          #   echo "AWS_ACCESS_KEY_ID=${{ secrets.DEV_AWS_ACCESS_KEY_ID }}" >> $GITHUB_ENV
-          #   echo "AWS_SECRET_ACCESS_KEY=${{ secrets.DEV_AWS_SECRET_ACCESS_KEY }}" >> $GITHUB_ENV
-          
           if [ "${{ github.event.inputs.environment }}" == "prod" ]; then
             echo "TARGET_GROUP_ARN=arn:aws:elasticloadbalancing:us-east-1:867089037134:targetgroup/afe-prod/d86c3fb58d495135" >> $GITHUB_ENV
             echo "EC2_INSTANCE_NAME=afe-prod" >> $GITHUB_ENV
@@ -53,24 +46,3 @@ jobs:
 
       - name: Checkout
         uses: actions/checkout@v4
-
-      # - name: Run Terraform commands
-      #   run: |
-      #     cd terraform
-      #     if [ "${{ github.event.inputs.environment }}" == "prod" ]; then
-      #         terraform init -backend-config=backend-prod.tfvars
-      #         if [ "${{ github.event.inputs.command }}" == "plan" ]; then
-      #           terraform plan
-      #         elif [ "${{ github.event.inputs.command }}" == "apply" ]; then
-      #           terraform apply -auto-approve
-      #         elif [ "${{ github.event.inputs.command }}" == "destroy" ]; then
-      #           terraform destroy -auto-approve
-      #     else
-      #         terraform init -backend-config=backend-dev.tfvars
-      #         if [ "${{ github.event.inputs.command }}" == "plan" ]; then
-      #           terraform plan
-      #         elif [ "${{ github.event.inputs.command }}" == "apply" ]; then
-      #           terraform apply -auto-approve
-      #         elif [ "${{ github.event.inputs.command }}" == "destroy" ]; then
-      #           terraform destroy -auto-approve
-      #     fi
