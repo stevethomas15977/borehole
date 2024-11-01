@@ -19,7 +19,6 @@ on:
         options:
           - plan
           - apply
-          - reload
           - destroy
 
 env:
@@ -56,10 +55,6 @@ jobs:
             terraform plan 
           fi
           if [ "${{ github.event.inputs.command }}" == "apply" ]; then
-            terraform apply -auto-approve
-          fi
-          if [ "${{ github.event.inputs.command }}" == "reload" ]; then
-            terraform taint aws_lightsail_instance.instance
             terraform apply -auto-approve
           fi
           if [ "${{ github.event.inputs.command }}" == "destroy" ]; then
