@@ -50,7 +50,13 @@ jobs:
       - name: Run Terraform commands
         run: |
           cd terraform
-          terraform init -backend-config=backend-dev.tfvars
+
+          if [ "${{ github.event.inputs.environment }}" == "prod" ]; then
+            terraform init -backend-config=backend-prod.tfvars
+          else
+            terraform init -backend-config=backend-dev.tfvars
+          fi
+          
           if [ "${{ github.event.inputs.command }}" == "plan" ]; then
             terraform plan 
           fi
