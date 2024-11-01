@@ -59,7 +59,7 @@ jobs:
             terraform apply -auto-approve
           fi
           if [ "${{ github.event.inputs.command }}" == "reload" ]; then
-            tarraform taint aws_lightsail_instance.instance
+            terraform taint aws_lightsail_instance.instance
             terraform apply -auto-approve
           fi
           if [ "${{ github.event.inputs.command }}" == "destroy" ]; then
