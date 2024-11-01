@@ -160,8 +160,6 @@ resource "aws_lightsail_instance" "instance" {
         sudo chmod 644 /etc/nginx/.htpasswd
         sudo chown www-data:www-data /etc/nginx/.htpasswd
         export USERNAME="afe-admin"
-        echo "USERNAME is $USERNAME"
-        echo "APP_SECRET is $APP_SECRET"
         echo $APP_SECRET | sudo htpasswd -ci /etc/nginx/.htpasswd $USERNAME
 
         sudo nginx -t
