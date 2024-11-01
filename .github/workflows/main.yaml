@@ -35,7 +35,7 @@ jobs:
           echo "TF_VAR_ghpat=${{ secrets.AFE_GH_PAT }}" >> $GITHUB_ENV
           echo "TF_VAR_appsecret=${{ secrets.APP_SECRET }}" >> $GITHUB_ENV
           if [ "${{ github.event.inputs.environment }}" == "prod" ]; then
-            echo "AWS_ACCESS_KEY_ID=${{ secrets.PROD_AWS_ACCESS_KEY_ID }}" >> $GITHUB_ENV
+            echo "AWS_ACCESS_KEY_ID=${{ vars.PROD_AWS_ACCESS_KEY_ID }}" >> $GITHUB_ENV
             echo "AWS_SECRET_ACCESS_KEY=${{ secrets.PROD_AWS_SECRET_ACCESS_KEY }}" >> $GITHUB_ENV
             echo "TF_VAR_env=afe-prod" >> $GITHUB_ENV
           else
