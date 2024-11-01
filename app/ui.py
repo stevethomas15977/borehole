@@ -45,7 +45,7 @@ def index():
     env = os.getenv('ENV')
     version = os.getenv('VERSION')
     server = os.getenv('AFE_PROD_DNS')
-    return render_template('index.html', app=app.capitalize(), version=version, server=server)
+    return render_template('index.html', app=app.capitalize(), version=version, server=server, env=env)
 
 def run_workflow(workflow_manager: WorkflowManager):
     try:
