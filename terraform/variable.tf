@@ -19,3 +19,8 @@ variable "appsecret" {
     description = "Application secret"
     type        = string
 }
+
+variable "env" {
+    description = "Environment"
+    type        = string
+}

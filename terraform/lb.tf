@@ -51,16 +51,16 @@ resource "aws_lightsail_lb" "lb" {
 }
 
 # # Attach SSL Certificate to Load Balancer
-resource "aws_lightsail_lb_certificate" "afe-dev-softwarelikeyou-com" {
-  name        = "afe"
+resource "aws_lightsail_lb_certificate" "certificate" {
+  name        = "certificate"
   lb_name     = aws_lightsail_lb.lb.name
-  domain_name = "afe-dev.softwarelikeyou.com"
+  domain_name = "${var.env}.softwarelikeyou.com"
   depends_on = [ aws_lightsail_lb.lb ]
 }
 
 resource "aws_lightsail_lb_certificate_attachment" "lb-certificate-attachment" {
   lb_name          = aws_lightsail_lb.lb.name
-  certificate_name = aws_lightsail_lb_certificate.afe-dev-softwarelikeyou-com.name
+  certificate_name = aws_lightsail_lb_certificate.certificate.name
 }
 
 # # Attach Instance to Load Balancer

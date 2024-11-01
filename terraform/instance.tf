@@ -33,8 +33,8 @@ resource "aws_lightsail_instance" "instance" {
         # Set up the environment variables
         export GH_PAT="${var.ghpat}"
         export APP_SECRET="${var.appsecret}"
+        export ENV="${var.env}"
         export APP="afe"
-        export ENV="Production"
         export APP_ROOT="/home/ubuntu"
         export AFE_PATH=$APP_ROOT/afe
         export APP_PATH=$AFE_PATH/app
@@ -65,7 +65,6 @@ resource "aws_lightsail_instance" "instance" {
 
         # Set up the environment variables
         export HTTP_PORT=80
-        export ENV="prod"
 
         sh -c "cat > $APP_PATH/.env" <<EOG
         VERSION="1.7.0"

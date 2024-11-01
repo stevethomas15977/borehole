@@ -41,10 +41,10 @@ def health():
 
 @app.route('/')
 def index():
-    app = os.getenv('ENV')
+    app = os.getenv('APP')
+    env = os.getenv('ENV')
     version = os.getenv('VERSION')
     server = os.getenv('AFE_PROD_DNS')
-    print(f"Application : {app}, Version: {version}, Server: {server}")
     return render_template('index.html', app=app.capitalize(), version=version, server=server)
 
 def run_workflow(workflow_manager: WorkflowManager):

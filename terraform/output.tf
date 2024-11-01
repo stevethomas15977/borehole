@@ -20,5 +20,5 @@ output "application_url" {
 
 output "ssl_certificate_arn" {
   description = "The ARN of the SSL certificate attached to the Load Balancer"
-  value       = aws_lightsail_lb_certificate.afe-dev-softwarelikeyou-com.arn
+  value       = aws_lightsail_lb_certificate.certificate.arn
 }
