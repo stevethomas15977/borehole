@@ -1,8 +1,3 @@
-output "aws_lightsail_bucket" {
-    description = "ARN of the aws lightsail bucket name"
-    value = aws_lightsail_bucket.bucket.name
-}
-
 output "load_balancer_dns" {
   description = "The DNS name of the Lightsail Load Balancer"
   value       = aws_lightsail_lb.lb.dns_name
