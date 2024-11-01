@@ -26,10 +26,6 @@ resource "aws_lightsail_instance" "instance" {
         rm -rf aws
         rm awscliv2.zip
 
-        aws configure set aws_access_key_id ${aws_lightsail_bucket_access_key.bucket-access-key.access_key_id} --profile lightsail
-        aws configure set aws_secret_access_key ${aws_lightsail_bucket_access_key.bucket-access-key.secret_access_key} --profile lightsail
-        aws configure set region "us-east-1" --profile lightsail
-
         # Set up the environment variables
         export GH_PAT="${var.ghpat}"
         export APP_SECRET="${var.appsecret}"
