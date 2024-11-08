@@ -16,7 +16,6 @@ pydash = "==8.0.1"
 python-dotenv = "==1.0.1"
 python-dateutil = "==2.9.0.post0"
 randomcolor = "==0.4.4.6"
-utm = "==0.7.0"
 werkzeug = "==3.0.3"
 wordcloud = "==1.9.3"
 gunicorn = "*"
@@ -39,6 +38,7 @@ regex = "*"
 boto3 = "*"
 pyarrow = "*"
 mplcursors = "*"
+utm = "*"
 
 [dev-packages]
 
