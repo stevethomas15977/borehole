@@ -63,7 +63,8 @@ resource "aws_lightsail_instance" "instance" {
         export HTTP_PORT=80
 
         sh -c "cat > $APP_PATH/.env" <<EOG
-        VERSION="1.7.0"
+        PYTHONPATH="${PYTHONPATH}:models:helpers:services:database"
+        VERSION="1.7.1"
         ENV="$ENV"
         APP="$APP"
         APP_ROOT="$APP_ROOT"
