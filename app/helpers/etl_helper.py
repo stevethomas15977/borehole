@@ -50,7 +50,7 @@ def load_wells(db_path:str , file_path: str) -> None:
             county = row["County"]
             if state == "TX":
                 if not isna(row["Abstract"]):
-                    abstract = f"A-{int(row['Abstract'])}"
+                    abstract = f"A-{row['Abstract']}"
                 else:
                     abstract = None
             else:
