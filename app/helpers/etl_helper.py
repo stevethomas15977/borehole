@@ -44,7 +44,10 @@ def load_wells(db_path:str , file_path: str) -> None:
             measured_depth = row["MD_FT"]
             kelly_bushing_elevation = row["ElevationKB_FT"]
             lateral_length = row["LateralLength_FT"]
-            perf_interval = row["PerfInterval_FT"] if row["PerfInterval_FT"] != None else row["LateralLength_FT"] 
+            if isna(row["PerfInterval_FT"]) or row["PerfInterval_FT"] is None:
+                perf_interval = row["LateralLength_FT"] 
+            else:
+                perf_interval = row["PerfInterval_FT"]
             proppant_intensity = row["ProppantIntensity_LBSPerFT"]
             state = row["StateProvince"]
             county = row["County"]

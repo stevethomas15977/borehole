@@ -5,10 +5,19 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Python Debugger: Current File",
+            "name": "Debug Workflow Manager",
             "type": "debugpy",
             "request": "launch",
             "program": "${workspaceFolder}/app/workflow_manager.py",
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}/app",
+            "envFile": "${workspaceFolder}/.env"
+        },
+        {
+            "name": "Debug UI",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/app/ui.py",
             "console": "integratedTerminal",
             "cwd": "${workspaceFolder}/app",
             "envFile": "${workspaceFolder}/.env"
