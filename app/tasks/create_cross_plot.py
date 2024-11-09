@@ -128,7 +128,7 @@ class CreateCrossPlot(Task):
                     continue
 
                 if "11-111" in xyz_distance.target_api:
-                    color = "green"
+                    color = "orange"
                     alpha = 0.90
                     zorder = 5
                     marker = 's'  # 's' for square
