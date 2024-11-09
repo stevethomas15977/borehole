@@ -84,25 +84,25 @@ class CreateCrossPlot(Task):
             ax.set_xlim(x_min, x_max)
             ax.set_ylim(y_min, y_max)
 
-            plt.yticks(np.arange(y_min, y_max + 1, 500))
+            # plt.yticks(np.arange(y_min, y_max + 1, 500))
 
-            depths = np.arange(y_min, y_max, 500)
+            depths = np.arange(y_min, y_max, 100)
             for depth in depths:
                 ax.axhline(depth, color='lightgrey', linewidth=0.5, linestyle='--', alpha=0.90, zorder=0)
 
-            plt.xticks(np.arange(x_min, x_max + 1, 5000))
+            # plt.xticks(np.arange(x_min, x_max + 1, 5000))
 
-            widths = np.arange(x_min, x_max, 5000)
+            widths = np.arange(x_min, x_max, 1000)
             for width in widths:
                 ax.axvline(width, color='lightgrey', linewidth=0.5, linestyle='--', alpha=0.90, zorder=0)  
 
             # Set axis labels
             if target_well.state == "TX":
-                x_axis_label = f"Bottom hole spacing from west line {target_well.state}/{target_well.county}/{target_well.tx_abstract_southwest_corner}/{target_well.tx_block_southwest_corner}/{int(float(target_well.nm_tx_section_southwest_corner))}) (ft)"
+                x_axis_label = f"Bottom hole spacing from west line {target_well.state}/{target_well.county}/{target_well.tx_abstract_southwest_corner}/{target_well.tx_block_southwest_corner}/{int(float(target_well.nm_tx_section_southwest_corner))}) (500 ft/int.)"
             elif target_well.state == "NM":
-                x_axis_label = f"Bottom hole spacing from west line {target_well.state}/{target_well.county}/{target_well.nw_township_southwest_corner}/{target_well.nm_range_southwest_corner}/{int(float(target_well.nm_tx_section_southwest_corner))}) (ft)"
+                x_axis_label = f"Bottom hole spacing from west line {target_well.state}/{target_well.county}/{target_well.nw_township_southwest_corner}/{target_well.nm_range_southwest_corner}/{int(float(target_well.nm_tx_section_southwest_corner))}) (500 ft/int.)"
             ax.set_xlabel(x_axis_label)
-            ax.set_ylabel(f"Depth below mean sea level (ft)")
+            ax.set_ylabel(f"Depth below mean sea level (1000 ft/int.)")
 
             # Plot west section line
             specific_x = 0
@@ -120,7 +120,7 @@ class CreateCrossPlot(Task):
             scatters = []
             well_name_list = []
 
-            for xyz_distance in xyz_distances:
+            for i, xyz_distance in enumerate(xyz_distances, start=1):
                 analysis = analysis_service.get_by_api(xyz_distance.target_api)
 
                 # Skip if the depth is not within the plot range
@@ -137,7 +137,7 @@ class CreateCrossPlot(Task):
                     alpha = 0.70
                     zorder = 3
                     marker = 'o'  # 'o' for circle
-                    size = 50
+                    size = 100
 
                     stratigraphic = stratigraphic_service.get_by_union_code(analysis.interval)
                     if stratigraphic:
@@ -146,6 +146,8 @@ class CreateCrossPlot(Task):
                         color = "black"
 
                 scatter = ax.scatter(xyz_distance.end_x, analysis.subsurface_depth, marker=marker, facecolor=color, s=size)
+                ax.annotate(str(i), (xyz_distance.end_x, analysis.subsurface_depth), color='black', fontsize=fontsize, ha='center', va='center', weight='bold', zorder=6)
+
                 # ax.scatter(xyz_distance.end_x, analysis.subsurface_depth, marker=marker, facecolor=color, s=size)
                 scatters.append(scatter)
                 well_name_list.append(xyz_distance.target_api)  
@@ -197,6 +199,7 @@ class CreateCrossPlot(Task):
             # Save plot data to Excel
             data_worksheet = cross_plot_workbook.create_sheet("Data")            
             headers = [
+                'Ref #',
                 'Well API',
                 'Well Name',
                 'Well Landing Zone',
@@ -205,7 +208,7 @@ class CreateCrossPlot(Task):
             ]
             data_worksheet.append(headers)
 
-            for xyz_distance in xyz_distances:
+            for i, xyz_distance in enumerate(xyz_distances, start=1):
                 analysis = analysis_service.get_by_api(xyz_distance.target_api)
                 if analysis.subsurface_depth < y_min or analysis.subsurface_depth > y_max:
                     continue
@@ -216,6 +219,7 @@ class CreateCrossPlot(Task):
                 else:
                     api = analysis.api
                 row = [
+                    i,
                     api,
                     analysis.name,
                     analysis.interval,

@@ -9,16 +9,6 @@
     <h2>Welcome to {{ app }} on {{ env }}</h2>
     <p>Version: {{ version }} running on AWS Lightsail</p>
 
-    <b>Rrelease notes:</b>
-    <p>Offset Well Identification spreadsheet</p>
-    <ul>
-        <li>Add LateralLength_FT and Effective_Perf_Interval</li>
-    </ul>
-    <p>Gun Barrel & Cross Plot</p>
-    <ul>
-        <li></li>
-    </ul>
-
     {% with messages = get_flashed_messages() %}
         {% if messages %}
             <ul>
@@ -49,5 +39,17 @@
     <a href="https://stevethomascpapublic.s3.amazonaws.com/target_well_information-TEMPLATE.xlsx" target="_blank">
         Download a copy of Target Well Information Template v1.6.x
     </a>
+    <br><br>
+    <b>Rrelease notes:</b>
+    <p>Offset Well Identification spreadsheet</p>
+    <ul>
+        <li>Add LateralLength_FT and Effective_Perf_Interval</li>
+    </ul>
+    <p>Cross Plot</p>
+    <ul>
+        <li>Add grid lines</li>
+        <li>Change colors so they are different (assign permanent / same colors to landings zones per Michaels table)</li>
+        <li>Add ref numbers on the spreadsheet well list and show number on the plot (in the dot).  Note: Put wells in alphabetical order by well name before numbering.</li>
+    </ul>
 </body>
 </html>
