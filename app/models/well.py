@@ -29,7 +29,8 @@ class Well:
         township:str=None,
         range:str=None,
         section:str=None,
-        cumlative_oil:int=None
+        cumlative_oil:int=None,
+        last_producing_month=None
     ):
         self._api = api
         self._name = name
@@ -57,6 +58,7 @@ class Well:
         self._range = range
         self._section = section
         self._cumlative_oil = cumlative_oil
+        self._last_producing_month = last_producing_month
 
     # Getters
     @property
@@ -267,3 +269,11 @@ class Well:
     @cumlative_oil.setter
     def cumlative_oil(self, value):
         self._cumlative_oil = value
+
+    @property
+    def last_producing_month(self):
+        return self._last_producing_month
+    
+    @last_producing_month.setter
+    def last_producing_month(self, value):
+        self._last_producing_month = value

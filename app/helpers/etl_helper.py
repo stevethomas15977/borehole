@@ -61,7 +61,8 @@ def load_wells(db_path:str , file_path: str) -> None:
             township = row["Township"] if state in ["TX", "NM"] else None
             range = row["Range"] if state == "NM" else None
             section = str(int(row["Section"])).zfill(2) if state in ["TX", "NM"] else None
-            cumlative_oil = row["CumOil_BBL"]
+            cumlative_oil = row["CumOil_BBL"]   
+            last_producing_month = row["LastProducingMonth"]
             well = Well(
                 api=api,
                 name=well_name,
@@ -88,7 +89,8 @@ def load_wells(db_path:str , file_path: str) -> None:
                 township=township,
                 range=range,
                 section=section,
-                cumlative_oil=cumlative_oil)
+                cumlative_oil=cumlative_oil,
+                last_producing_month=last_producing_month)
             well_list.append(well)
         well_service = WellService(db_path=db_path)
         well_service.add(well_list)
