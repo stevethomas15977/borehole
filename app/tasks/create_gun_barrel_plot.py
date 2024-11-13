@@ -1,8 +1,12 @@
 from tasks.task import Task
 from tasks.task_enum import TASKS
 from helpers import (task_logger, HandlerWithText, calculate_angle, marker_colors)
-from services import (AnalysisService, TargetWellInformationService, 
-                      WellService, GunBarrelService, GunBarrelTriangleDistancesService)
+from services import (AnalysisService, 
+                      TargetWellInformationService, 
+                      WellService, 
+                      GunBarrelService, 
+                      GunBarrelTriangleDistancesService, 
+                      XYZDistanceService)
 
 from traceback import format_exc
 import matplotlib.pyplot as plt
@@ -71,7 +75,7 @@ class CreateGunBarrelPlot(Task):
             gun_barrel_service = GunBarrelService(self.context.db_path)
             well_service = WellService(self.context.db_path)
             gun_barrel_triangle_distances_service = GunBarrelTriangleDistancesService(self.context.db_path)
-
+            xyz_distance_service = XYZDistanceService(self.context.db_path)
             target_well = target_well_information_service.get_first_row()
 
             # Create the plot
@@ -386,6 +390,10 @@ class CreateGunBarrelPlot(Task):
             plot_data_worksheet.append(headers)
             for key, value in api_to_index.items():
                 target_well_analysis = analysis_service.get_by_api(key)
+                xyz_distance = xyz_distance_service.get_by_reference_target_well(reference_well_api='00-000-00000', target_well_api=key)
+                fwl = 'TBD'
+                if xyz_distance:
+                    fwl = xyz_distance.end_x
                 if '11-111' in key:
                     key = ''
                 plot_data_worksheet.append([
@@ -393,8 +401,8 @@ class CreateGunBarrelPlot(Task):
                     key,
                     target_well_analysis.name,    
                     target_well_analysis.subsurface_depth,
-                    'TBD',
-                    'TDB'
+                    fwl,
+                    'TBD'
                 ])
 
             self.enrich_worksheet(plot_data_worksheet, headers)
