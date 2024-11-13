@@ -494,12 +494,6 @@ class CreateGunBarrelPlot(Task):
                         sum_of_overlap_cumulative_oil_ft += gun_barrel.overlap_cumulative_oil_ft
                         sum_3d_distance += gun_barrel_distance.hypotenuse
                         count += 1
-                # calculated_data_worksheet.append([' ',' ',' ',' ',
-                #                                     'Total Overlap CumOil bbl/ft and Weighted Avg 3-D',
-                #                                     ' ',' ',' ',' ',' ',' ',
-                #                                     sum_of_overlap_cumulative_oil_ft,
-                #                                     int(sum_3d_distance/count)])
-                # calculated_data_worksheet.append([])
 
             self.enrich_worksheet(calculated_data_worksheet, header)
 
@@ -511,49 +505,6 @@ class CreateGunBarrelPlot(Task):
             image.height = image.height * 0.35  # Scale the height to 50%
 
             plot_worksheet.add_image(image, f"A{plot_worksheet.max_row + 0}")
-            
-            # # Save data calculation to Excel
-            # data_worksheet = gun_barrel_workbook.create_sheet("Data")            
-            # headers = [
-            #     'target_well_index',
-            #     'offset_well_index',
-            #     'target_well_api',
-            #     'offset_well_api',
-            #     'overlap_feet',
-            #     'overlap_percentage',
-            #     'cumulative_oil_per_ft',
-            #     'overlap_cumulative_oil_ft',
-            #     'months_from_first_production',
-            #     'horizontal_distance',
-            #     'vertical_distance',
-            #     'three_d_distance'
-            # ]
-            # data_worksheet.append(headers)
-            
-            # for gun_barrel in gun_barrel_service.select_all():
-            #     if gun_barrel.target_well_api not in api_to_index or gun_barrel.offset_well_api not in api_to_index:
-            #         continue
-            #     gun_barrel_distances = gun_barrel_triangle_distances_service.select_by_target_offset_api(gun_barrel.target_well_api, gun_barrel.offset_well_api)
-            #     if gun_barrel_distances:
-            #         horizontal_distance = gun_barrel_distances.adjacent
-            #         vertical_distance = gun_barrel_distances.opposite
-            #         three_d_distance = gun_barrel_distances.hypotenuse
-            #     data_worksheet.append([
-            #         api_to_index[gun_barrel.target_well_api],
-            #         api_to_index[gun_barrel.offset_well_api],
-            #         gun_barrel.target_well_api,
-            #         gun_barrel.offset_well_api,
-            #         gun_barrel.overlap_feet,
-            #         gun_barrel.overlap_percentage,
-            #         gun_barrel.cumulative_oil_per_ft,
-            #         gun_barrel.overlap_cumulative_oil_ft,
-            #         gun_barrel.months_from_first_production,
-            #         horizontal_distance if horizontal_distance else None,
-            #         vertical_distance if vertical_distance else None,
-            #         three_d_distance if three_d_distance else None
-            #     ])
-
-            # self.enrich_worksheet(data_worksheet, headers)
 
             # Save to excel
             excel_file = os.path.join(self.context.project_path, f"{self.context.project}-gun-barrel-plot-{self.context.version}.xlsx")
@@ -565,5 +516,6 @@ class CreateGunBarrelPlot(Task):
 
             logger.info(f"{task}: {self.context.logs_path}")
         except Exception as e:
-            logger.error(f"Error {task} workflow task: {e}\n{format_exc()}")
-            raise ValueError(f"Error {task} workflow task: {e}")
+            message = f"Error {task} workflow task: {e}"
+            logger.error(msg=message)
+            raise ValueError(e)
