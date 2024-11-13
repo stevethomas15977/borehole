@@ -1,12 +1,19 @@
 from tasks.task import Task
 from tasks.task_enum import TASKS
-from helpers import (task_logger, HandlerWithText, calculate_angle, marker_colors)
+from helpers import (task_logger, 
+                     HandlerWithText, 
+                     calculate_angle, 
+                     marker_colors,
+                     latlon_to_utm_feet)
+
 from services import (AnalysisService, 
                       TargetWellInformationService, 
                       WellService, 
                       GunBarrelService, 
                       GunBarrelTriangleDistancesService, 
-                      XYZDistanceService)
+                      XYZDistanceService,
+                      TexasLandSurveySystemService,
+                      NewMexicoLandSurveySystemService)
 
 from traceback import format_exc
 import matplotlib.pyplot as plt
@@ -76,6 +83,9 @@ class CreateGunBarrelPlot(Task):
             well_service = WellService(self.context.db_path)
             gun_barrel_triangle_distances_service = GunBarrelTriangleDistancesService(self.context.db_path)
             xyz_distance_service = XYZDistanceService(self.context.db_path)
+            texas_land_survey_system_service = TexasLandSurveySystemService(self.context._texas_land_survey_system_database_path)
+            new_mexico_land_survey_system_service = NewMexicoLandSurveySystemService(self.context._new_mexico_land_survey_system_database_path) 
+
             target_well = target_well_information_service.get_first_row()
 
             # Create the plot
@@ -112,8 +122,21 @@ class CreateGunBarrelPlot(Task):
             # Set axis labels
             if target_well.state == "TX":
                 x_axis_label = f"Bottom hole spacing from west line {target_well.state}/{target_well.county}/{target_well.tx_abstract_southwest_corner}/{target_well.tx_block_southwest_corner}/{int(float(target_well.nm_tx_section_southwest_corner))}) (100 ft intervals)"
+                plss = texas_land_survey_system_service.get_by_county_abstract_block_section(target_well.county, target_well.tx_abstract_southwest_corner, target_well.tx_block_southwest_corner, str(int(float(target_well.nm_tx_section_southwest_corner))))            
+                if plss:
+                    fnl_grid_x, fnl_grid_y = latlon_to_utm_feet(plss.northwest_latitude, plss.northwest_longitude)
+        
             elif target_well.state == "NM":
                 x_axis_label = f"Bottom hole spacing from west line {target_well.state}/{target_well.county}/{target_well.nw_township_southwest_corner}/{target_well.nm_range_southwest_corner}/{int(float(target_well.nm_tx_section_southwest_corner))}) (100 ft intervals)"
+                township = int(target_well.nw_township_southwest_corner[:-1])
+                township_direction = target_well.nw_township_southwest_corner[-1]
+                nm_range = int(target_well.nm_range_southwest_corner[:-1])
+                range_direction = target_well.nm_range_southwest_corner[-1]
+                section = int(target_well.nm_tx_section_southwest_corner)
+                plss = new_mexico_land_survey_system_service.get_by_township_range_section(township=township, township_direction=township_direction, range=nm_range, range_direction=range_direction, section=section)            
+                if plss:
+                    fnl_grid_x, fnl_grid_y = latlon_to_utm_feet(plss.northwest_latitude, plss.northwest_longitude)
+
             ax.set_xlabel(x_axis_label)
             ax.set_ylabel(f"Depth below mean sea level (100 ft intervals)")
 
@@ -392,8 +415,11 @@ class CreateGunBarrelPlot(Task):
                 target_well_analysis = analysis_service.get_by_api(key)
                 xyz_distance = xyz_distance_service.get_by_reference_target_well(reference_well_api='00-000-00000', target_well_api=key)
                 fwl = 'TBD'
+                fnl = 'TBD'
                 if xyz_distance:
-                    fwl = xyz_distance.end_x
+                    fwl = str(xyz_distance.end_x)
+                if fnl_grid_y:
+                    fnl = str(int(fnl_grid_y - target_well_analysis.lateral_end_grid_y))
                 if '11-111' in key:
                     key = ''
                 plot_data_worksheet.append([
@@ -402,7 +428,7 @@ class CreateGunBarrelPlot(Task):
                     target_well_analysis.name,    
                     target_well_analysis.subsurface_depth,
                     fwl,
-                    'TBD'
+                    fnl
                 ])
 
             self.enrich_worksheet(plot_data_worksheet, headers)
