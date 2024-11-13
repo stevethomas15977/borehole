@@ -124,7 +124,7 @@ class CreateGunBarrelPlot(Task):
                 x_axis_label = f"Bottom hole spacing from west line {target_well.state}/{target_well.county}/{target_well.tx_abstract_southwest_corner}/{target_well.tx_block_southwest_corner}/{int(float(target_well.nm_tx_section_southwest_corner))}) (100 ft intervals)"
                 plss = texas_land_survey_system_service.get_by_county_abstract_block_section(target_well.county, target_well.tx_abstract_southwest_corner, target_well.tx_block_southwest_corner, str(int(float(target_well.nm_tx_section_southwest_corner))))            
                 if plss:
-                    fnl_grid_x, fnl_grid_y = latlon_to_utm_feet(plss.northwest_latitude, plss.northwest_longitude)
+                    fnl_grid_x, fnl_grid_y = latlon_to_utm_feet(plss.northeast_latitude, plss.northeast_longitude)
         
             elif target_well.state == "NM":
                 x_axis_label = f"Bottom hole spacing from west line {target_well.state}/{target_well.county}/{target_well.nw_township_southwest_corner}/{target_well.nm_range_southwest_corner}/{int(float(target_well.nm_tx_section_southwest_corner))}) (100 ft intervals)"
@@ -135,7 +135,7 @@ class CreateGunBarrelPlot(Task):
                 section = int(target_well.nm_tx_section_southwest_corner)
                 plss = new_mexico_land_survey_system_service.get_by_township_range_section(township=township, township_direction=township_direction, range=nm_range, range_direction=range_direction, section=section)            
                 if plss:
-                    fnl_grid_x, fnl_grid_y = latlon_to_utm_feet(plss.northwest_latitude, plss.northwest_longitude)
+                    fnl_grid_x, fnl_grid_y = latlon_to_utm_feet(plss.northeast_latitude, plss.northeast_longitude)
 
             ax.set_xlabel(x_axis_label)
             ax.set_ylabel(f"Depth below mean sea level (100 ft intervals)")

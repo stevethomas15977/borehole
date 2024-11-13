@@ -194,22 +194,15 @@ def draw_section_lines(coordinates: dict, tooltip: str, map: Map) -> None:
     # Marker for the southwest corner
     start = (coordinates['southwest_latitude'], coordinates['southwest_longitude'])
     CircleMarker(location=start, radius=5, color='red', fill=True, fill_color='red', fill_opacity=1.0, tooltip=tooltip).add_to(map)
-    # start = (tlss.north, tlss.southwest_longitude)
-    # end = (tlss.northwest_latitude, tlss.northwest_longitude)
-    # PolyLine([start, end], color='red', weight=3.0, tooltip=f"SW to NW").add_to(map)
-
-    # start = (tlss.northwest_latitude, tlss.northwest_longitude)
-    # end = (tlss.northeast_latitude, tlss.northeast_longitude)
-    # PolyLine([start, end], color='green', weight=3.0, tooltip=f"NW to NE").add_to(map)
-
-    # start = (tlss.northeast_latitude, tlss.northeast_longitude)
-    # end = adjust_coordinate(tlss.northeast_latitude, tlss.northeast_longitude, 10560, "S")
-    # PolyLine([start, end], color='blue', weight=3.0, tooltip=f"NE to SE").add_to(map)
 
     # Draw gun barrel slice
     start = adjust_coordinate(coordinates['southwest_latitude'], coordinates['southwest_longitude'], 2640, "W")
     end = adjust_coordinate(coordinates['southwest_latitude'], coordinates['southwest_longitude'], 7920, "E")
     PolyLine([start, end], color='red', weight=3.0, tooltip=f"Gun Barrel Slice").add_to(map)
+
+    start = coordinates['northwest_latitude'], coordinates['northwest_longitude']
+    end = adjust_coordinate(coordinates['northwest_latitude'], coordinates['northwest_longitude'], 5280, "W")
+    PolyLine([start, end], color='green', weight=3.0, tooltip=f"Northwest Section Line").add_to(map)
 
 def draw_wells(context: Context, 
                well_service: WellService, 

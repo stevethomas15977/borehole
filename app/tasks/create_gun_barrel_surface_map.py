@@ -73,12 +73,16 @@ class CreateGunBarrelSurfaceMap(Task):
             if target_well.state == "TX":
                 coordinates['southwest_latitude'] = tlss.southwest_latitude
                 coordinates['southwest_longitude'] = tlss.southwest_longitude
-                tooltip = f"SW Corner {tlss.abstract}-{tlss.block}-{tlss.section}"
+                coordinates['northwest_latitude'] = tlss.northeast_latitude
+                coordinates['northwest_longitude'] = tlss.northeast_longitude
+                tooltip = f"SW Corner {tlss.abstract}-{tlss.block}-{str(int(tlss.section))}"
                 draw_section_lines(coordinates=coordinates, tooltip=tooltip, map=map)
             elif target_well.state == "NM":
                 coordinates['southwest_latitude'] = nmlss.southwest_latitude
                 coordinates['southwest_longitude'] = nmlss.southwest_longitude
-                tooltip = f"SW Corner {nmlss.township}-{nmlss.range}-{nmlss.section}"
+                coordinates['northwest_latitude'] = nmlss.northeast_latitude
+                coordinates['northwest_longitude'] = nmlss.northeast_longitude
+                tooltip = f"SW Corner {nmlss.township}-{nmlss.range}-{str(int(nmlss.section))}"
                 draw_section_lines(coordinates=coordinates, tooltip=tooltip, map=map)
 
             #Draw the target wells

@@ -9,6 +9,8 @@ class WorkflowManager:
     def __init__(self, context: Context=None):
         self._context = context
         self._factory = TaskFactory(self._context)
+        if os.path.exists(os.path.join(self.context.project_path, f"ERROR")):
+            os.remove(os.path.join(self.context.project_path, f"ERROR"))
         write_to_file(os.path.join(self.context.project_path, f"RUNNING"),f"Running")
 
     def __del__(self):
@@ -61,9 +63,8 @@ class WorkflowManager:
         workgroup.add_task(TASKS.ENRICH_GUN_BARREL.value)
         workgroup.add_task(TASKS.CREATE_GUN_BARREL_PLOT.value)
         workgroup.add_task(TASKS.CREATE_CROSS_PLOT.value)
-
+        # workgroup.add_task(TASKS.CREATE_GUN_BARREL_SURFACE_MAP.value)
         # workgroup.add_task(TASKS.CREATE_CHILD_WELL_RISK_GUN_BARREL_PLOT_3D.value)
-        
         if self._context.target_well_information_file:
             workgroup.run()
 
@@ -77,7 +78,7 @@ class WorkflowManager:
         self._factory = TaskFactory(self._context)
 
 if __name__ == "__main__":
-    context = Context().dragonfly_5_mile()
+    context = Context().cobra_5_mile()
     workflow_manager = WorkflowManager(context)
     workflow_manager.project_initiation_workflow()
     workflow_manager.base_workflow()
