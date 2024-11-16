@@ -77,17 +77,27 @@ chart.set_x_axis({
     "min": -2640,
     "max": 7920,
     "major_unit": 1320,
+    "minor_unit": 100,
+    "minor_gridlines": {
+        "visible": True,
+        "line": {"color": "#D3D3D3", "width": 0.25},  # Light grey minor gridlines
+    },
     "name_font": {"bold": True},
     "label_position": "low",
     "crossing": "min",
 })
+
 chart.set_y_axis({
     "name": "Depth Below MSL (ft)",
     "min": -8500,
     "max": -6000,
     "major_unit": 500,
+    "minor_unit": 100,
+    "minor_gridlines": {
+        "visible": True,
+        "line": {"color": "#D3D3D3", "width": 0.25},  # Light grey minor gridlines
+    },
     "name_font": {"bold": True},
-    "label_position": "low",
 })
 
 # Adjust plot area and chart area to create space for the annotation
