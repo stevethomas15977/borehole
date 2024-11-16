@@ -8,8 +8,8 @@ chart_worksheet = workbook.add_worksheet("Chart")
 
 # Data as Python arrays
 data = {
-    "grid_x": [-2640, -1320, 0, 1320, 2640, 3960, 5280, 6600, 7920],
-    "depth": [-6000, -6500, -7000, -7500, -8000, -8500],
+    "grid_x": [1264, 1824, 1667, 2699, -273],
+    "depth": [-7122, -7352, -7159, -7401, -7100],
     "vertical_line_x": [0, 0],
     "vertical_line_y": [-8500, -6000],
     "annotation_x": [0],
