@@ -364,6 +364,24 @@ class Context():
         return context
     
     @staticmethod
+    def vjranch_5_mile():
+        context = Context()
+        context.project = "vjranch-5-mile"
+        context.project_path = os.path.join(context.projects_path, context.project)
+        
+        context.target_well_information_path = os.path.join(context.project_path, 'target_well_information')
+        context.well_data_path = os.path.join(context.project_path, 'well_data')
+        context.survey_data_path = os.path.join(context.project_path, 'survey_data')
+        context.logs_path = os.path.join(context.project_path, 'logs')
+
+        context.db_path = os.path.join(context.logs_path, f"{context.project}-{context.version}.db")
+
+        context.target_well_information_file = os.path.join(context.target_well_information_path, "vjranch-5-mile-target-well-information.xlsx")
+        context.well_file = os.path.join(context.well_data_path, "vjranch-5-mile-well-data.xlsx")
+        context.survey_file = os.path.join(context.survey_data_path, "vjranch-5-mile-survey-data.xlsx")
+        return context
+    
+    @staticmethod
     def michelada_10_mile():
         context = Context()
         context.project = "michelada-10-mile"
