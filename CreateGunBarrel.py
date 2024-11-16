@@ -1,8 +1,10 @@
 import xlsxwriter
 
-# Create a new workbook and add a worksheet
+# Create a new workbook and add worksheets
 workbook = xlsxwriter.Workbook("OilBarrelPlot.xlsx")
-worksheet = workbook.add_worksheet()
+plot_data_worksheet = workbook.add_worksheet("Plot Data")
+support_data_worksheet = workbook.add_worksheet("Support Data")
+chart_worksheet = workbook.add_worksheet("Chart")
 
 # Data as Python arrays
 data = {
@@ -14,41 +16,40 @@ data = {
     "annotation_y": [-8300], 
 }
 
-# Write data to the worksheet
-worksheet.write(0, 0, "Grid X (ft)")
-worksheet.write(0, 1, "Depth (ft)")
+# Write data to the "Plot Data" worksheet
+plot_data_worksheet.write(0, 0, "Grid X (ft)")
+plot_data_worksheet.write(0, 1, "Depth (ft)")
 for i, (x, y) in enumerate(zip(data["grid_x"], data["depth"]), start=1):
-    worksheet.write(i, 0, x)
-    worksheet.write(i, 1, y)
+    plot_data_worksheet.write(i, 0, x)
+    plot_data_worksheet.write(i, 1, y)
 
-# Write vertical line data
-worksheet.write(0, 3, "Vertical Line X")
-worksheet.write(0, 4, "Vertical Line Y")
+# Write Vertical Line and Annotation data to the "Support Data" worksheet
+support_data_worksheet.write(0, 0, "Vertical Line X")
+support_data_worksheet.write(0, 1, "Vertical Line Y")
 for i, (x, y) in enumerate(zip(data["vertical_line_x"], data["vertical_line_y"]), start=1):
-    worksheet.write(i, 3, x)
-    worksheet.write(i, 4, y)
+    support_data_worksheet.write(i, 0, x)
+    support_data_worksheet.write(i, 1, y)
 
-# Write annotation data with custom text
-worksheet.write(0, 6, "Annotation X")
-worksheet.write(0, 7, "Annotation Y")
+support_data_worksheet.write(0, 3, "Annotation X")
+support_data_worksheet.write(0, 4, "Annotation Y")
 for i, (x, y) in enumerate(zip(data["annotation_x"], data["annotation_y"]), start=1):
-    worksheet.write(i, 6, x)   # Write X-value
-    worksheet.write(i, 7, y)  # Write custom annotation text
+    support_data_worksheet.write(i, 3, x)
+    support_data_worksheet.write(i, 4, y)
 
 # Create a scatter chart
 chart = workbook.add_chart({"type": "scatter"})
 
 # Configure the main series
 chart.add_series({
-    "categories": f"=Sheet1!$A$2:$A${len(data['grid_x'])+1}",  # X-values
-    "values": f"=Sheet1!$B$2:$B${len(data['depth'])+1}",        # Y-values
-    "marker": {"type": "circle", "size": 7},                   # Circle markers
+    "categories": f"='Plot Data'!$A$2:$A${len(data['grid_x'])+1}",  # X-values
+    "values": f"='Plot Data'!$B$2:$B${len(data['depth'])+1}",        # Y-values
+    "marker": {"type": "circle", "size": 7},                        # Circle markers
 })
 
 # Add the vertical line series
 chart.add_series({
-    "categories": "=Sheet1!$D$2:$D$3",  # X-values for the line
-    "values": "=Sheet1!$E$2:$E$3",      # Y-values for the line
+    "categories": "='Support Data'!$A$2:$A$3",  # X-values for the line
+    "values": "='Support Data'!$B$2:$B$3",      # Y-values for the line
     "line": {
         "color": "blue",
         "width": 1,  # Thin line
@@ -59,14 +60,14 @@ chart.add_series({
 
 # Add the annotation series (outside the plot area)
 chart.add_series({
-    "categories": "=Sheet1!$G$2:$G$2",  # X-value for annotation
-    "values": "=Sheet1!$H$2:$H$2",      # Dummy Y-value within range
-    "name": "Section Line",             # Series name to display
-    "marker": {"type": "none"},         # Hide marker
+    "categories": "='Support Data'!$D$2:$D$2",  # X-value for annotation
+    "values": "='Support Data'!$E$2:$E$2",      # Dummy Y-value within range
+    "name": "Section Line",                     # Series name to display
+    "marker": {"type": "none"},                 # Hide marker
     "data_labels": {
-        "series_name": True,            # Display the series name
-        "value": False,                 # Do not display the Y value
-        "position": "above",            # Position label above the marker
+        "series_name": True,                    # Display the series name
+        "value": False,                         # Do not display the Y value
+        "position": "above",                    # Position label above the marker
     },
 })
 
@@ -108,9 +109,9 @@ chart.set_chartarea({"x": 0.1, "y": 0.05, "width": 0.7, "height": 0.9})  # Incre
 chart.set_size({"width": 1100, "height": 550})  # ~11.5" x 8"
 chart.set_legend({"none": True})  # Disable legend
 
-# Insert the chart into the worksheet
-worksheet.insert_chart("D5", chart)
+# Insert the chart into the "Chart" worksheet
+chart_worksheet.insert_chart("D5", chart)
 
 # Close the workbook
 workbook.close()
-print("Oil barrel plot with chart area annotation created.")
+print("Oil barrel plot with support data in a separate worksheet created.")
