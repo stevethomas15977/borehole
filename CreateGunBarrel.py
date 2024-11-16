@@ -10,11 +10,11 @@ data = {
     "depth": [-6000, -6500, -7000, -7500, -8000, -8500],
     "vertical_line_x": [0, 0],
     "vertical_line_y": [-8500, -6000],
-    "annotation_x": [0],  # X-value for annotation (center of the chart)
-    "annotation_y": [-8700], # Y-value for annotation (near top of chart area)
+    "annotation_x": [0],
+    "annotation_y": [-8300], 
 }
 
-# Write data to the worksheet and get ranges
+# Write data to the worksheet
 worksheet.write(0, 0, "Grid X (ft)")
 worksheet.write(0, 1, "Depth (ft)")
 for i, (x, y) in enumerate(zip(data["grid_x"], data["depth"]), start=1):
@@ -28,12 +28,12 @@ for i, (x, y) in enumerate(zip(data["vertical_line_x"], data["vertical_line_y"])
     worksheet.write(i, 3, x)
     worksheet.write(i, 4, y)
 
-# Write annotation data
+# Write annotation data with custom text
 worksheet.write(0, 6, "Annotation X")
 worksheet.write(0, 7, "Annotation Y")
 for i, (x, y) in enumerate(zip(data["annotation_x"], data["annotation_y"]), start=1):
-    worksheet.write(i, 6, x)
-    worksheet.write(i, 7, y)
+    worksheet.write(i, 6, x)   # Write X-value
+    worksheet.write(i, 7, y)  # Write custom annotation text
 
 # Create a scatter chart
 chart = workbook.add_chart({"type": "scatter"})
@@ -57,15 +57,16 @@ chart.add_series({
     "marker": {"type": "none"},  # No markers for the line
 })
 
-# Add the annotation series
+# Add the annotation series (outside the plot area)
 chart.add_series({
     "categories": "=Sheet1!$G$2:$G$2",  # X-value for annotation
-    "values": "=Sheet1!$H$2:$H$2",      # Y-value for annotation
+    "values": "=Sheet1!$H$2:$H$2",      # Dummy Y-value within range
+    "name": "Section Line",             # Series name to display
     "marker": {"type": "none"},         # Hide marker
     "data_labels": {
-        "value": True,
-        "custom": [{"text": "Section Line"}],  # Annotation text
-        "position": "below"                 # Position label in chart area
+        "series_name": True,            # Display the series name
+        "value": False,                 # Do not display the Y value
+        "position": "above",            # Position label above the marker
     },
 })
 
@@ -89,9 +90,9 @@ chart.set_y_axis({
     "label_position": "low",
 })
 
-# Adjust plot area and chart area
-chart.set_plotarea({"x": 0.1, "y": 0.1, "width": 0.7, "height": 0.7})
-chart.set_chartarea({"x": 0.1, "y": 0.1, "width": 0.7, "height": 0.7})
+# Adjust plot area and chart area to create space for the annotation
+chart.set_plotarea({"x": 0.1, "y": 0.2, "width": 0.7, "height": 0.6})
+chart.set_chartarea({"x": 0.1, "y": 0.05, "width": 0.7, "height": 0.9})  # Increase bottom margin
 
 # Set chart size and layout
 chart.set_size({"width": 1100, "height": 550})  # ~11.5" x 8"
