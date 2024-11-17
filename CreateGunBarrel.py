@@ -7,7 +7,7 @@ def fetch_plot_data_from_db():
     """
     grid_x = [1264, 1824, 1667, 2699, -273]
     depth = [-7122, -7352, -7159, -7401, -7100]
-    labels = [f"Well {i}" for i in range(1, len(grid_x) + 1)]  # Example labels
+    labels = [f"{i}" for i in range(1, len(grid_x) + 1)] 
 
     return grid_x, depth, labels
 
@@ -79,7 +79,7 @@ def create_chart_support_data(workbook):
 
 def create_chart(
     workbook, categories_range, values_range, vertical_line_categories,
-    vertical_line_values, annotation_categories, annotation_values, labels=None
+    vertical_line_values, annotation_categories, annotation_values, labels
 ):
     """
     Creates the oil barrel plot chart and inserts it into a new worksheet.
@@ -100,13 +100,18 @@ def create_chart(
         "categories": categories_range,  # Dynamic X-values
         "values": values_range,          # Dynamic Y-values
         "marker": {"type": "circle", "size": 12},  # Circle markers
-    }
-    if labels:
-        series_config["data_labels"] = {
-            "value": False,               # Hide Y-values
-            "custom": [{"text": lbl} for lbl in labels],  # Use custom labels
-            "position": "center",         # Place the label on the marker
+        'data_labels': {
+            'value': True,
+            'position': 'center',
+        "custom": [{"value": lbl, "index": lbl} for lbl in labels],
         }
+    }
+    # if labels:
+    #     series_config["data_labels"] = {
+    #         "value": True,
+    #         "position": "center",    
+    #         "custom": [{"value": lbl, "index": lbl} for lbl in labels],
+    #     }
     chart.add_series(series_config)
 
     # Add static series for the vertical line
@@ -184,12 +189,11 @@ grid_x, depth, labels = fetch_plot_data_from_db()
 # Create the 'Plot Data' worksheet
 categories_range, values_range, labels_range = create_plot_data_worksheet(workbook, grid_x, depth, labels)
 
-
 # Create the 'Support Data' worksheet
 vertical_line_categories, vertical_line_values, annotation_categories, annotation_values = create_chart_support_data(workbook)
 
 # Create the chart
-create_chart(workbook, categories_range, values_range, vertical_line_categories, vertical_line_values, annotation_categories, annotation_values)
+create_chart(workbook, categories_range, values_range, vertical_line_categories, vertical_line_values, annotation_categories, annotation_values, labels)
 
 # Close the workbook
 workbook.close()
