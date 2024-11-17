@@ -106,12 +106,6 @@ def create_chart(
         "custom": [{"value": lbl, "index": lbl} for lbl in labels],
         }
     }
-    # if labels:
-    #     series_config["data_labels"] = {
-    #         "value": True,
-    #         "position": "center",    
-    #         "custom": [{"value": lbl, "index": lbl} for lbl in labels],
-    #     }
     chart.add_series(series_config)
 
     # Add static series for the vertical line
