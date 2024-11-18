@@ -88,42 +88,73 @@ class CreateExcelNativeGunBarrelPlot(Task):
         first_row = 2
         row = 1
         last_row = 0
-        labels = []
+        refs = []
+        lzs = []
 
+        # Plot target wells
         for well in target_wells:
             worksheet.write(row, 0, row)
-            labels.append(row)
+            refs.append(row)
+            lzs.append(well.interval)
             worksheet.write(row, 1, "")
             worksheet.write(row, 2, well.name)
             worksheet.write(row, 3, well.gun_barrel_x)
             worksheet.write(row, 4, well.subsurface_depth)
             row = row + 1
         last_row = row
-        target_well_series = {
+        target_well_series_1 = {
             "categories": f"='Plot Data'!$D${first_row}:$D${last_row}",         # Dynamic X-values
             "values": f"='Plot Data'!$E${first_row}:$E${last_row}",             # Dynamic Y-values
             "marker": {"type": "triangle", "size": 12, "fill": {"color": "orange"}},
-            "data_labels": {"value": True,"position": "center","custom": [{"value": lbl, "index": lbl} for lbl in labels],}
+            "data_labels": {
+                "value": True,
+                "position": "center",
+                "custom": [{"value": ref, "index": ref} for ref in refs],
+            }   
+        }
+        target_well_series_2 = {
+            "categories": f"='Plot Data'!$D${first_row}:$D${last_row}",         # Dynamic X-values
+            "values": f"='Plot Data'!$E${first_row}:$E${last_row}",             # Dynamic Y-values
+            "marker": {"type": "none"},
+            "data_labels": {
+                "value": True,
+                "position": "above",
+                "custom": [{"value": lz, "index": lz} for lz in lzs],
+            }   
         }
 
+        # Plot other wells
+        refs = []
+        lzs = []
         first_row, row = last_row + 1, last_row
         for well in other_wells:
             worksheet.write(row, 0, row)
-            labels.append(row)
+            refs.append(row)
+            lzs.append(well.interval)
             worksheet.write(row, 1, well.api)
             worksheet.write(row, 2, well.name)
             worksheet.write(row, 3, well.gun_barrel_x)
             worksheet.write(row, 4, well.subsurface_depth)
             row = row + 1
         last_row = row
-        other_well_series = {
+        other_well_series_1 = {
             "categories": f"='Plot Data'!$D${first_row}:$D${last_row}",         # Dynamic X-values
             "values": f"='Plot Data'!$E${first_row}:$E${last_row}",             # Dynamic Y-values
             "marker": {"type": "circle", "size": 12, "fill": {"color": "green"}},
-            "data_labels": {"value": True,"position": "center","custom": [{"value": lbl, "index": lbl} for lbl in labels],}
+            "data_labels": {"value": True,"position": "center","custom": [{"value": ref, "index": ref} for ref in refs],}
+        }
+        other_well_series_2 = {
+            "categories": f"='Plot Data'!$D${first_row}:$D${last_row}",         # Dynamic X-values
+            "values": f"='Plot Data'!$E${first_row}:$E${last_row}",             # Dynamic Y-values
+            "marker": {"type": "none"},
+            "data_labels": {
+                "value": True,
+                "position": "above",
+                "custom": [{"value": lz, "index": lz} for lz in lzs],
+            }   
         }
 
-        return target_well_series, other_well_series
+        return target_well_series_1, target_well_series_2, other_well_series_1, other_well_series_2
 
     def section_line_label(self, target_well: TargetWellInformation):
         try:
@@ -174,8 +205,10 @@ class CreateExcelNativeGunBarrelPlot(Task):
                     workbook: Workbook, 
                     title: str, 
                     section_line_label: str, 
-                    target_well_series: dict,
-                    other_well_series: dict):
+                    target_well_series_1: dict,
+                    target_well_series_2: dict,
+                    other_well_series_1: dict,
+                    other_well_series_2: dict):
         try:
             # Create a scatter chart
             plot = workbook.add_chart({"type": "scatter"})
@@ -239,8 +272,10 @@ class CreateExcelNativeGunBarrelPlot(Task):
                 },
             })
 
-            plot.add_series(target_well_series)
-            plot.add_series(other_well_series)
+            plot.add_series(target_well_series_1)
+            plot.add_series(target_well_series_2)
+            plot.add_series(other_well_series_1)
+            plot.add_series(other_well_series_2)
 
             plot_worksheet = workbook.add_worksheet("Plot")
             plot_worksheet.insert_chart("B4", plot)
@@ -269,9 +304,15 @@ class CreateExcelNativeGunBarrelPlot(Task):
             # Main script
             workbook = Workbook(output_file)
 
-            target_well_series, other_well_series = self.create_plot_data_worksheet(workbook, target_wells, other_wells)
+            target_well_series_1, target_well_series_2, other_well_series_1, other_well_series_2 = self.create_plot_data_worksheet(workbook, target_wells, other_wells)
 
-            self.create_plot(workbook, plot_title, section_line_label, target_well_series, other_well_series)
+            self.create_plot(workbook, 
+                             plot_title, 
+                             section_line_label, 
+                             target_well_series_1, 
+                             target_well_series_2, 
+                             other_well_series_1,
+                             other_well_series_2)   
 
             # Close the workbook
             workbook.close()
