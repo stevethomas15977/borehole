@@ -356,7 +356,7 @@ class CreateExcelNativeGunBarrelPlot(Task):
                             "categories": f"='Line Series'!$C${row}:$D${row}",
                             "values": f"='Line Series'!$E${row}:$F${row}",
                             "line": {
-                                "color": "black",
+                                "color": "#7D7F7C",
                                 "width": .5,
                                 "dash_type": "dash",
                             },
@@ -373,7 +373,8 @@ class CreateExcelNativeGunBarrelPlot(Task):
                                 "custom": [{"value": f"='Line Series'!$G${row}", 
                                             "index": f"='Line Series'!$G${row}"}],
                                 "font": {
-                                    "size": 10 
+                                    "size": 10,
+                                    "color": "#7D7F7C"
                                 },          
                             },
                         })
