@@ -36,6 +36,7 @@ from tasks.create_child_well_risk_gun_barrel_plot_zoomed import CreateChildWellR
 from tasks.create_cross_plot import CreateCrossPlot
 from tasks.enrich_gun_barrel import EnrichGunBarrel
 from tasks.create_gun_barrel_excel import CreateGunBarrelExcel
+from tasks.create_excel_native_gun_barrel_plot import CreateExcelNativeGunBarrelPlot
 
 from tasks.task import Task
 from tasks.task_enum import TASKS
@@ -119,5 +120,7 @@ class TaskFactory:
             return EnrichGunBarrel(self.context)
         elif task_type == TASKS.CREATE_GUN_BARREL_EXCEL.value:
             return CreateGunBarrelExcel(self.context)
+        elif task_type == TASKS.CREATE_EXCEL_NATIVE_GUN_BARREL_PLOT.value:
+            return CreateExcelNativeGunBarrelPlot(self.context) 
         else:
             raise ValueError(f"Unknown task type: {task_type}")

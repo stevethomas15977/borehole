@@ -46,6 +46,7 @@ class TASKS(Enum):
     CREATE_CHILD_WELL_RISK_GUN_BARREL_PLOT_DATA_SPREADSHEET = 'create_child_well_risk_gun_barrel_plot_data_spreadsheet'
     CREATE_GUN_BARREL_PLOT = 'create_gun_barrel_plot'
     CREATE_CROSS_PLOT = 'create_cross_plot'
+    CREATE_EXCEL_NATIVE_GUN_BARREL_PLOT = 'create_excel_native_gun_barrel_plot'
     
     # Public Land Survey System Workflow Group Tasks
     LOAD_TEXAS_LAND_SURVEY_SYSTEM = 'load_texas_land_survey_system'

@@ -1,4 +1,4 @@
-import xlsxwriter
+import xlsxwriter, math
 
 def fetch_plot_data_from_db():
     """
@@ -9,7 +9,15 @@ def fetch_plot_data_from_db():
     depth = [-7122, -7352, -7159, -7401, -7100]
     labels = [f"{i}" for i in range(1, len(grid_x) + 1)] 
 
-    return grid_x, depth, labels
+    # Calculate distances between consecutive points
+    distances = []
+    for i in range(len(grid_x) - 1):
+        delta_x = grid_x[i + 1] - grid_x[i]
+        delta_y = depth[i + 1] - depth[i]
+        distance = math.sqrt(delta_x**2 + delta_y**2)
+        distances.append(round(distance, 2))  # Rounded to 2 decimal places
+
+    return grid_x, depth, labels, distances
 
 def create_plot_data_worksheet(workbook, grid_x, depth, labels=None):
     """
@@ -40,6 +48,34 @@ def create_plot_data_worksheet(workbook, grid_x, depth, labels=None):
     labels_range = f"='Plot Data'!$C$2:$C${len(labels) + 1}" if labels else None  # Label range
     return categories_range, values_range, labels_range
 
+def create_distance_data_worksheet(workbook, grid_x, depth, distances):
+    """
+    Create a worksheet to store intermediate data for distances and lines.
+    """
+    worksheet = workbook.add_worksheet("Distance Data")
+    worksheet.write(0, 0, "Start X")
+    worksheet.write(0, 1, "Start Y")
+    worksheet.write(0, 2, "End X")
+    worksheet.write(0, 3, "End Y")
+    worksheet.write(0, 4, "Distance")
+
+    for i, distance in enumerate(distances):
+        worksheet.write(i + 1, 0, grid_x[i])
+        worksheet.write(i + 1, 1, depth[i])
+        worksheet.write(i + 1, 2, grid_x[i + 1])
+        worksheet.write(i + 1, 3, depth[i + 1])
+        worksheet.write(i + 1, 4, distance)
+
+    # Return the range references for charting
+    line_ranges = [
+        (
+            f"='Distance Data'!$A${i + 2}:$A${i + 3}",  # X1, X2
+            f"='Distance Data'!$B${i + 2}:$B${i + 3}",  # Y1, Y2
+            f"='Distance Data'!$E${i + 2}"              # Distance label
+        )
+        for i in range(len(distances))
+    ]
+    return line_ranges
 
 def create_chart_support_data(workbook):
     """
@@ -79,7 +115,7 @@ def create_chart_support_data(workbook):
 
 def create_chart(
     workbook, categories_range, values_range, vertical_line_categories,
-    vertical_line_values, annotation_categories, annotation_values, labels
+    vertical_line_values, annotation_categories, annotation_values, labels, line_ranges
 ):
     """
     Creates the oil barrel plot chart and inserts it into a new worksheet.
@@ -108,6 +144,24 @@ def create_chart(
     }
     chart.add_series(series_config)
 
+    # Add lines for distances
+    for x_range, y_range, distance_label in line_ranges:
+        chart.add_series({
+            "categories": x_range,
+            "values": y_range,
+            "line": {
+                "color": "red",
+                "width": 1,
+                "dash_type": "solid",
+            },
+            "marker": {"type": "none"},  # No markers
+            "data_labels": {
+                "value": True,          # Display distance as label
+                "custom": [{"text": distance_label}],
+                "position": "center",
+            },
+        })
+        
     # Add static series for the vertical line
     chart.add_series({
         "categories": vertical_line_categories,  # Static X-values for the vertical line
@@ -178,16 +232,19 @@ def create_chart(
 workbook = xlsxwriter.Workbook("OilBarrelPlot.xlsx")
 
 # Fetch dynamic data for 'Plot Data'
-grid_x, depth, labels = fetch_plot_data_from_db()
+grid_x, depth, labels, distances = fetch_plot_data_from_db()
 
 # Create the 'Plot Data' worksheet
 categories_range, values_range, labels_range = create_plot_data_worksheet(workbook, grid_x, depth, labels)
+
+# Create the 'Distance Data' worksheet
+line_ranges = create_distance_data_worksheet(workbook, grid_x, depth, distances)
 
 # Create the 'Support Data' worksheet
 vertical_line_categories, vertical_line_values, annotation_categories, annotation_values = create_chart_support_data(workbook)
 
 # Create the chart
-create_chart(workbook, categories_range, values_range, vertical_line_categories, vertical_line_values, annotation_categories, annotation_values, labels)
+create_chart(workbook, categories_range, values_range, vertical_line_categories, vertical_line_values, annotation_categories, annotation_values, labels, line_ranges)
 
 # Close the workbook
 workbook.close()
