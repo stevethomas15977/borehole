@@ -221,7 +221,7 @@ class CreateExcelNativeGunBarrelPlot(Task):
             plot.set_size({"width": 1100, "height": 550})  # ~11.5" x 8"
             plot.set_legend({"none": True})  # Disable legend
             plot.set_x_axis({
-                "name": "Lateral Bottom Hole Spacing (ft)",
+                "name": "Bottom hole lateral distance from section line (100 ft intervals)",
                 "min": -2640,
                 "max": 7920,
                 "major_unit": 1320,
@@ -235,7 +235,7 @@ class CreateExcelNativeGunBarrelPlot(Task):
                 "crossing": "min",
             })
             plot.set_y_axis({
-                "name": "Depth Below MSL (ft)",
+                "name": "Bottom hole depth below MSL (100 ft intervals)",
                 "min": -8500,
                 "max": -6000,
                 "major_unit": 500,
