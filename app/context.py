@@ -215,7 +215,7 @@ class Context():
 
     @property
     def hypotenuse_distance_threshold(self):
-        return self._hypotenuse_distance_threshold
+        return int(self._hypotenuse_distance_threshold)
     
     @hypotenuse_distance_threshold.setter
     def hypotenuse_distance_threshold(self, hypotenuse_distance_threshold):

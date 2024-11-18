@@ -90,11 +90,13 @@ class CreateExcelNativeGunBarrelPlot(Task):
         last_row = 0
         refs = []
         lzs = []
+        ref_index = {}
 
-        # Plot target wells
+        # Plot target wells 
         for well in target_wells:
             worksheet.write(row, 0, row)
             refs.append(row)
+            ref_index[well.name] = row
             lzs.append(well.interval)
             worksheet.write(row, 1, "")
             worksheet.write(row, 2, well.name)
@@ -110,6 +112,10 @@ class CreateExcelNativeGunBarrelPlot(Task):
                 "value": True,
                 "position": "center",
                 "custom": [{"value": ref, "index": ref} for ref in refs],
+                "font": {
+                    "size": 12,
+                    "bold": True,
+                },   
             }   
         }
         target_well_series_2 = {
@@ -130,6 +136,7 @@ class CreateExcelNativeGunBarrelPlot(Task):
         for well in other_wells:
             worksheet.write(row, 0, row)
             refs.append(row)
+            ref_index[well.name] = row
             lzs.append(well.interval)
             worksheet.write(row, 1, well.api)
             worksheet.write(row, 2, well.name)
@@ -141,7 +148,15 @@ class CreateExcelNativeGunBarrelPlot(Task):
             "categories": f"='Plot Data'!$D${first_row}:$D${last_row}",         # Dynamic X-values
             "values": f"='Plot Data'!$E${first_row}:$E${last_row}",             # Dynamic Y-values
             "marker": {"type": "circle", "size": 12, "fill": {"color": "green"}},
-            "data_labels": {"value": True,"position": "center","custom": [{"value": ref, "index": ref} for ref in refs],}
+            "data_labels": {
+                "value": True,
+                "position": "center","custom": 
+                [{"value": ref, "index": ref} for ref in refs], 
+                "font": {
+                    "size": 12,
+                    "bold": True,
+                },
+            }
         }
         other_well_series_2 = {
             "categories": f"='Plot Data'!$D${first_row}:$D${last_row}",         # Dynamic X-values
@@ -154,7 +169,7 @@ class CreateExcelNativeGunBarrelPlot(Task):
             }   
         }
 
-        return target_well_series_1, target_well_series_2, other_well_series_1, other_well_series_2
+        return ref_index, target_well_series_1, target_well_series_2, other_well_series_1, other_well_series_2
 
     def section_line_label(self, target_well: TargetWellInformation):
         try:
@@ -201,6 +216,71 @@ class CreateExcelNativeGunBarrelPlot(Task):
 
         return vertical_line_categories, vertical_line_values, annotation_categories, annotation_values
 
+    def create_calculated_data_worksheet(self, 
+                                         workbook: Workbook, 
+                                         ref_index: dict,
+                                         target_wells: list[Analysis], 
+                                         other_wells: list[Analysis]):
+        try:
+            results = []
+            worksheet = workbook.add_worksheet("Calculated Data")
+            worksheet.write(0, 0, "Target Ref #")
+            worksheet.write(0, 1, "Offset Ref #")
+            worksheet.write(0, 2, "Target X")
+            worksheet.write(0, 3, "Offset X")   
+            worksheet.write(0, 4, "Target Y")
+            worksheet.write(0, 5, "Offset Y")
+            worksheet.write(0, 6, "Distance")
+            worksheet.write(0, 7, "Midpoint X")
+            worksheet.write(0, 8, "Midpoint Y")
+
+            row = 1
+            for target_well in target_wells:
+                for other_well in other_wells:
+                    x_distance = abs(target_well.lateral_end_grid_x - other_well.lateral_end_grid_x)
+                    y_distance = abs(target_well.subsurface_depth - other_well.subsurface_depth)
+                    hypotenuse_distance = int(math.sqrt(x_distance**2 + y_distance**2))
+                    worksheet.write(row, 0, ref_index[target_well.name])
+                    worksheet.write(row, 1, ref_index[other_well.name])
+                    worksheet.write(row, 2, target_well.gun_barrel_x)
+                    worksheet.write(row, 3, other_well.gun_barrel_x)
+                    worksheet.write(row, 4, target_well.subsurface_depth)
+                    worksheet.write(row, 5, other_well.subsurface_depth)
+                    worksheet.write(row, 6, hypotenuse_distance)
+                    worksheet.write(row, 7, int((target_well.gun_barrel_x + other_well.gun_barrel_x) / 2))
+                    worksheet.write(row, 8, int((target_well.subsurface_depth + other_well.subsurface_depth) / 2))
+                    row = row + 1
+                    if hypotenuse_distance < self.context.hypotenuse_distance_threshold:    
+                        results.append({
+                            "categories": f"='Calculated Data'!$C${row}:$D${row}",
+                            "values": f"='Calculated Data'!$E${row}:$F${row}",
+                            "line": {
+                                "color": "black",
+                                "width": .5,
+                                "dash_type": "dash",
+                            },
+                            "marker": {"type": "none"},
+                        })
+
+                        results.append({
+                            "categories":  f"='Calculated Data'!$H${row}:$H${row}",
+                            "values":  f"='Calculated Data'!$I${row}:$I${row}",
+                            "marker": {"type": "none"}, 
+                            "data_labels": {
+                                "value": False,
+                                "position": "center",
+                                "custom": [{"value": f"='Calculated Data'!$G${row}", 
+                                            "index": f"='Calculated Data'!$G${row}"}],
+                                "font": {
+                                    "size": 10 
+                                },          
+                            },
+                        })
+     
+            return results
+        except Exception as e:
+            raise e
+        
     def create_plot(self, 
                     workbook: Workbook, 
                     title: str, 
@@ -208,7 +288,8 @@ class CreateExcelNativeGunBarrelPlot(Task):
                     target_well_series_1: dict,
                     target_well_series_2: dict,
                     other_well_series_1: dict,
-                    other_well_series_2: dict):
+                    other_well_series_2: dict,
+                    line_series: list[dict]):
         try:
             # Create a scatter chart
             plot = workbook.add_chart({"type": "scatter"})
@@ -277,6 +358,9 @@ class CreateExcelNativeGunBarrelPlot(Task):
             plot.add_series(other_well_series_1)
             plot.add_series(other_well_series_2)
 
+            for series in line_series:
+                plot.add_series(series)
+
             plot_worksheet = workbook.add_worksheet("Plot")
             plot_worksheet.insert_chart("B4", plot)
 
@@ -304,7 +388,9 @@ class CreateExcelNativeGunBarrelPlot(Task):
             # Main script
             workbook = Workbook(output_file)
 
-            target_well_series_1, target_well_series_2, other_well_series_1, other_well_series_2 = self.create_plot_data_worksheet(workbook, target_wells, other_wells)
+            ref_index, target_well_series_1, target_well_series_2, other_well_series_1, other_well_series_2 = self.create_plot_data_worksheet(workbook, target_wells, other_wells)
+
+            line_series = self.create_calculated_data_worksheet(workbook, ref_index, target_wells, other_wells)    
 
             self.create_plot(workbook, 
                              plot_title, 
@@ -312,7 +398,8 @@ class CreateExcelNativeGunBarrelPlot(Task):
                              target_well_series_1, 
                              target_well_series_2, 
                              other_well_series_1,
-                             other_well_series_2)   
+                             other_well_series_2,
+                             line_series)   
 
             # Close the workbook
             workbook.close()
