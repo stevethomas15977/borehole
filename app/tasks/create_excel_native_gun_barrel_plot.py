@@ -73,17 +73,92 @@ class CreateExcelNativeGunBarrelPlot(Task):
         except Exception as e:
             raise e
 
+    def create_well_data_worksheet(self, workbook: Workbook, well_service: WellService, ref_index: dict, other_wells: list[Analysis]):
+        try:
+            worksheet = workbook.add_worksheet("Well Data")
+
+            data_format = workbook.add_format({
+                'align': 'center',
+                'border': 1,
+                'text_wrap': True
+            })
+
+            header_format = workbook.add_format({
+                'bold': True,
+                'align': 'center',
+                'bg_color': '#DDEBF7',
+                'border': 1,
+                'text_wrap': True
+            })  
+                
+            headers = [
+                "Well Ref Number",
+                "API",	
+                "Well Name",
+                "Operator",	
+                "Landing zone",	
+                "First Production Date",	
+                "TVD",	
+                "Perf Interval",	
+                "Lateral length",	
+                "Proppant Intensity LBS/ft",
+                "Type",	
+                "Group by Radius",
+            ]
+
+            row = 0
+            for i, header in enumerate(headers):
+                worksheet.write(row, i, header, header_format)
+
+            row = 1
+            for analysis in other_wells:
+                well = well_service.get_by_api(analysis.api)
+                worksheet.write(row, 0, ref_index[well.name], data_format)
+                worksheet.write(row, 1, well.api, data_format)
+                worksheet.write(row, 2, well.name, data_format)
+                worksheet.write(row, 3, well.operator, data_format)
+                worksheet.write(row, 4, well.interval, data_format)
+                worksheet.write(row, 5, well.first_production_date, data_format)
+                worksheet.write(row, 6, well.total_vertical_depth, data_format)
+                worksheet.write(row, 7, well.perf_interval, data_format)
+                worksheet.write(row, 8, well.lateral_length, data_format)
+                worksheet.write(row, 9, well.proppant_intensity, data_format)
+                worksheet.write(row, 10, "TBD", data_format)
+                worksheet.write(row, 11, "TBD", data_format)
+                row = row + 1
+
+            worksheet.autofit()
+
+        except Exception as e:
+            raise e
+        
     def create_plot_data_worksheet(self, 
                                    workbook: Workbook, 
                                    target_wells: list[Analysis], 
                                    other_wells: list[Analysis]):
 
         worksheet = workbook.add_worksheet("Plot Data")
-        worksheet.write(0, 0, "Ref #")
-        worksheet.write(0, 1, "API")
-        worksheet.write(0, 2, "Name")
-        worksheet.write(0, 3, "X")
-        worksheet.write(0, 4, "Y")
+
+        data_format = workbook.add_format({
+            'align': 'center',
+            'border': 1,
+            'text_wrap': True
+        })
+
+        header_format = workbook.add_format({
+            'bold': True,
+            'align': 'center',
+            'bg_color': '#DDEBF7',
+            'border': 1,
+            'text_wrap': True
+        })  
+                
+        worksheet.write(0, 0, "Well Ref Number", header_format)
+        worksheet.write(0, 1, "API", header_format)
+        worksheet.write(0, 2, "Target Well", header_format)
+        worksheet.write(0, 3, "FNL Section (X)", header_format)
+        worksheet.write(0, 4, "TVD Subsea depth (Y)", header_format)
+        worksheet.write(0, 5, "FNL Section", header_format)
 
         first_row = 2
         row = 1
@@ -94,14 +169,16 @@ class CreateExcelNativeGunBarrelPlot(Task):
 
         # Plot target wells 
         for well in target_wells:
-            worksheet.write(row, 0, row)
+            worksheet.write(row, 0, row, data_format)
             refs.append(row)
             ref_index[well.name] = row
             lzs.append(well.interval)
-            worksheet.write(row, 1, "")
-            worksheet.write(row, 2, well.name)
-            worksheet.write(row, 3, well.gun_barrel_x)
-            worksheet.write(row, 4, well.subsurface_depth)
+            worksheet.write(row, 1, "", data_format)
+            worksheet.write(row, 2, well.name, data_format)
+            worksheet.write(row, 3, well.gun_barrel_x, data_format)
+            worksheet.write(row, 4, well.subsurface_depth, data_format)
+            worksheet.write(row, 5, "TBD", data_format)
+
             row = row + 1
         last_row = row
         target_well_series_1 = {
@@ -134,14 +211,15 @@ class CreateExcelNativeGunBarrelPlot(Task):
         lzs = []
         first_row, row = last_row + 1, last_row
         for well in other_wells:
-            worksheet.write(row, 0, row)
+            worksheet.write(row, 0, row, data_format)
             refs.append(row)
             ref_index[well.name] = row
             lzs.append(well.interval)
-            worksheet.write(row, 1, well.api)
-            worksheet.write(row, 2, well.name)
-            worksheet.write(row, 3, well.gun_barrel_x)
-            worksheet.write(row, 4, well.subsurface_depth)
+            worksheet.write(row, 1, well.api, data_format)
+            worksheet.write(row, 2, well.name, data_format)
+            worksheet.write(row, 3, well.gun_barrel_x, data_format)
+            worksheet.write(row, 4, well.subsurface_depth, data_format)
+            worksheet.write(row, 5, "TBD", data_format) 
             row = row + 1
         last_row = row
         other_well_series_1 = {
@@ -168,6 +246,8 @@ class CreateExcelNativeGunBarrelPlot(Task):
                 "custom": [{"value": lz, "index": lz} for lz in lzs],
             }   
         }
+
+        worksheet.autofit()
 
         return ref_index, target_well_series_1, target_well_series_2, other_well_series_1, other_well_series_2
 
@@ -224,15 +304,30 @@ class CreateExcelNativeGunBarrelPlot(Task):
         try:
             results = []
             worksheet = workbook.add_worksheet("Calculated Data")
-            worksheet.write(0, 0, "Target Ref #")
-            worksheet.write(0, 1, "Offset Ref #")
-            worksheet.write(0, 2, "Target X")
-            worksheet.write(0, 3, "Offset X")   
-            worksheet.write(0, 4, "Target Y")
-            worksheet.write(0, 5, "Offset Y")
-            worksheet.write(0, 6, "Distance")
-            worksheet.write(0, 7, "Midpoint X")
-            worksheet.write(0, 8, "Midpoint Y")
+
+            data_format = workbook.add_format({
+                'align': 'center',
+                'border': 1,
+                'text_wrap': True
+            })
+
+            header_format = workbook.add_format({
+                'bold': True,
+                'align': 'center',
+                'bg_color': '#DDEBF7',
+                'border': 1,
+                'text_wrap': True
+            })  
+
+            worksheet.write(0, 0, "Target Ref #", header_format)
+            worksheet.write(0, 1, "Offset Ref #", header_format)
+            worksheet.write(0, 2, "Target X", header_format)
+            worksheet.write(0, 3, "Offset X", header_format)   
+            worksheet.write(0, 4, "Target Y", header_format)
+            worksheet.write(0, 5, "Offset Y", header_format)
+            worksheet.write(0, 6, "Distance", header_format)
+            worksheet.write(0, 7, "Midpoint X", header_format)
+            worksheet.write(0, 8, "Midpoint Y", header_format)
 
             row = 1
             for target_well in target_wells:
@@ -240,15 +335,15 @@ class CreateExcelNativeGunBarrelPlot(Task):
                     x_distance = abs(target_well.lateral_end_grid_x - other_well.lateral_end_grid_x)
                     y_distance = abs(target_well.subsurface_depth - other_well.subsurface_depth)
                     hypotenuse_distance = int(math.sqrt(x_distance**2 + y_distance**2))
-                    worksheet.write(row, 0, ref_index[target_well.name])
-                    worksheet.write(row, 1, ref_index[other_well.name])
-                    worksheet.write(row, 2, target_well.gun_barrel_x)
-                    worksheet.write(row, 3, other_well.gun_barrel_x)
-                    worksheet.write(row, 4, target_well.subsurface_depth)
-                    worksheet.write(row, 5, other_well.subsurface_depth)
-                    worksheet.write(row, 6, hypotenuse_distance)
-                    worksheet.write(row, 7, int((target_well.gun_barrel_x + other_well.gun_barrel_x) / 2))
-                    worksheet.write(row, 8, int((target_well.subsurface_depth + other_well.subsurface_depth) / 2))
+                    worksheet.write(row, 0, ref_index[target_well.name], data_format)
+                    worksheet.write(row, 1, ref_index[other_well.name], data_format)
+                    worksheet.write(row, 2, target_well.gun_barrel_x, data_format)
+                    worksheet.write(row, 3, other_well.gun_barrel_x, data_format)
+                    worksheet.write(row, 4, target_well.subsurface_depth, data_format)
+                    worksheet.write(row, 5, other_well.subsurface_depth, data_format)
+                    worksheet.write(row, 6, hypotenuse_distance, data_format)
+                    worksheet.write(row, 7, int((target_well.gun_barrel_x + other_well.gun_barrel_x) / 2), data_format)
+                    worksheet.write(row, 8, int((target_well.subsurface_depth + other_well.subsurface_depth) / 2), data_format)
                     row = row + 1
                     if hypotenuse_distance < self.context.hypotenuse_distance_threshold:    
                         results.append({
@@ -277,6 +372,8 @@ class CreateExcelNativeGunBarrelPlot(Task):
                             },
                         })
      
+            worksheet.autofit()
+
             return results
         except Exception as e:
             raise e
@@ -389,6 +486,8 @@ class CreateExcelNativeGunBarrelPlot(Task):
             workbook = Workbook(output_file)
 
             ref_index, target_well_series_1, target_well_series_2, other_well_series_1, other_well_series_2 = self.create_plot_data_worksheet(workbook, target_wells, other_wells)
+
+            self.create_well_data_worksheet(workbook, well_service, ref_index, other_wells)
 
             line_series = self.create_calculated_data_worksheet(workbook, ref_index, target_wells, other_wells)    
 

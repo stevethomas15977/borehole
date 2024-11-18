@@ -754,9 +754,9 @@ class AFEDB:
 
         SELECT_XYZDISTANCES_BY_REFERENCE_API = """SELECT * FROM xyzdistance WHERE reference_api = ?"""
 
-        SELECT_XYZ_DISTANCE_BY_REFERENCE_API_TARGET_API = """SELECT * FROM xyzdistance WHERE reference_api = ? AND target_api = ?"""
+        SELECT_XYZ_DISTANCE_BY_REFERENCE_API_TARGET_API = """SELECT * FROM xyzdistance WHERE reference_api = ? AND target_api = ? ORDER BY target_name DESC"""
         
-        SELECT_XYZ_DISTANCE_BY_SIMULATED_WELL = """SELECT * FROM xyzdistance WHERE reference_api = ? ORDER BY target_name DESC"""
+        SELECT_XYZ_DISTANCE_BY_SIMULATED_WELL = """SELECT * FROM xyzdistance WHERE reference_api = ? ORDER BY target_name ASC"""
 
         SELECT_XYZ_DISTANCE_BY_REFERENCE_WELL = """SELECT * 
                                                 FROM xyzdistance 
