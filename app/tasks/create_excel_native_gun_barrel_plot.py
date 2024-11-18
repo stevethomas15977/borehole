@@ -2,8 +2,9 @@ from tasks.task import Task
 from tasks.task_enum import TASKS
 from traceback import format_exc
 import math, os
-from xlsxwriter import Workbook
-
+from xlsxwriter import Workbook, worksheet
+from datetime import datetime
+from dateutil.relativedelta import relativedelta
 from helpers import (task_logger, is_within_y_range)
 from services import (AnalysisService, 
                       TargetWellInformationService, 
@@ -73,9 +74,13 @@ class CreateExcelNativeGunBarrelPlot(Task):
         except Exception as e:
             raise e
 
-    def create_well_data_worksheet(self, workbook: Workbook, well_service: WellService, ref_index: dict, other_wells: list[Analysis]):
+    def create_well_data_worksheet(self, 
+                                   workbook: Workbook, 
+                                   worksheet: worksheet,
+                                   well_service: WellService, 
+                                   ref_index: dict, 
+                                   other_wells: list[Analysis]):
         try:
-            worksheet = workbook.add_worksheet("Well Data")
 
             data_format = workbook.add_format({
                 'align': 'center',
@@ -134,10 +139,9 @@ class CreateExcelNativeGunBarrelPlot(Task):
         
     def create_plot_data_worksheet(self, 
                                    workbook: Workbook, 
+                                   worksheet: worksheet,
                                    target_wells: list[Analysis], 
                                    other_wells: list[Analysis]):
-
-        worksheet = workbook.add_worksheet("Plot Data")
 
         data_format = workbook.add_format({
             'align': 'center',
@@ -264,7 +268,7 @@ class CreateExcelNativeGunBarrelPlot(Task):
         """
         Creates a 'Support Data' worksheet with static data for vertical lines and annotations.
         """
-        worksheet = workbook.add_worksheet("Support Data")
+        worksheet = workbook.add_worksheet("Annotation")
 
         # Static data for vertical lines
         vertical_line_x = [0, 0]  # Static X-values for vertical line
@@ -289,21 +293,22 @@ class CreateExcelNativeGunBarrelPlot(Task):
             worksheet.write(i, 4, y)
 
         # Return ranges for the chart
-        vertical_line_categories = "='Support Data'!$A$2:$A$3"
-        vertical_line_values = "='Support Data'!$B$2:$B$3"
-        annotation_categories = "='Support Data'!$D$2:$D$2"
-        annotation_values = "='Support Data'!$E$2:$E$2"
+        vertical_line_categories = "='Annotation'!$A$2:$A$3"
+        vertical_line_values = "='Annotation'!$B$2:$B$3"
+        annotation_categories = "='Annotation'!$D$2:$D$2"
+        annotation_values = "='Annotation'!$E$2:$E$2"
 
         return vertical_line_categories, vertical_line_values, annotation_categories, annotation_values
 
-    def create_calculated_data_worksheet(self, 
+    def create_line_series_data_worksheet(self, 
                                          workbook: Workbook, 
+                                         worksheet: worksheet,  
                                          ref_index: dict,
                                          target_wells: list[Analysis], 
                                          other_wells: list[Analysis]):
         try:
             results = []
-            worksheet = workbook.add_worksheet("Calculated Data")
+            pairs = []
 
             data_format = workbook.add_format({
                 'align': 'center',
@@ -345,10 +350,11 @@ class CreateExcelNativeGunBarrelPlot(Task):
                     worksheet.write(row, 7, int((target_well.gun_barrel_x + other_well.gun_barrel_x) / 2), data_format)
                     worksheet.write(row, 8, int((target_well.subsurface_depth + other_well.subsurface_depth) / 2), data_format)
                     row = row + 1
-                    if hypotenuse_distance < self.context.hypotenuse_distance_threshold:    
+                    if hypotenuse_distance < self.context.hypotenuse_distance_threshold:  
+                        pairs.append((target_well.name, other_well.name))
                         results.append({
-                            "categories": f"='Calculated Data'!$C${row}:$D${row}",
-                            "values": f"='Calculated Data'!$E${row}:$F${row}",
+                            "categories": f"='Line Series'!$C${row}:$D${row}",
+                            "values": f"='Line Series'!$E${row}:$F${row}",
                             "line": {
                                 "color": "black",
                                 "width": .5,
@@ -358,14 +364,14 @@ class CreateExcelNativeGunBarrelPlot(Task):
                         })
 
                         results.append({
-                            "categories":  f"='Calculated Data'!$H${row}:$H${row}",
-                            "values":  f"='Calculated Data'!$I${row}:$I${row}",
+                            "categories":  f"='Line Series'!$H${row}:$H${row}",
+                            "values":  f"='Line Series'!$I${row}:$I${row}",
                             "marker": {"type": "none"}, 
                             "data_labels": {
                                 "value": False,
                                 "position": "center",
-                                "custom": [{"value": f"='Calculated Data'!$G${row}", 
-                                            "index": f"='Calculated Data'!$G${row}"}],
+                                "custom": [{"value": f"='Line Series'!$G${row}", 
+                                            "index": f"='Line Series'!$G${row}"}],
                                 "font": {
                                     "size": 10 
                                 },          
@@ -374,12 +380,13 @@ class CreateExcelNativeGunBarrelPlot(Task):
      
             worksheet.autofit()
 
-            return results
+            return results, pairs
         except Exception as e:
             raise e
         
     def create_plot(self, 
                     workbook: Workbook, 
+                    worksheet: worksheet,
                     title: str, 
                     section_line_label: str, 
                     target_well_series_1: dict,
@@ -458,13 +465,161 @@ class CreateExcelNativeGunBarrelPlot(Task):
             for series in line_series:
                 plot.add_series(series)
 
-            plot_worksheet = workbook.add_worksheet("Plot")
-            plot_worksheet.insert_chart("B4", plot)
+            worksheet.insert_chart("B4", plot)
 
             return None
         except Exception as e:
             raise e
+
+    def create_calulated_data_worksheet(self, 
+                                        workbook, worksheet,
+                                        pairs: list[tuple[str, str]],
+                                        ref_index: dict,
+                                        analysis_service: AnalysisService,
+                                        target_well_information_service: TargetWellInformationService,
+                                        well_service: WellService):
+        try:
+            headers = [
+                'target_well_index',
+                'offset_well_index',
+                'Target Well Name',	
+                'Offset Well Name',	
+                'Targete Well First Prod Date',	
+                'Offset Well First Prod Date',	
+                'Months to First Production',	
+                'Target Well Perf Interval',	
+                'Offset Well Perf Interval',	
+                'Offset Well Cum Oil Date',	
+                'overlap_feet',	
+                'overlap_percentage',
+                'Cum Oil',	
+                'cumulative_oil_per_ft',	
+                'overlap_cumulative_oil_ft',	
+                'months_from_first_production',	
+                'horizontal_distance',	
+                'vertical_distance',	
+                'three_d_distance']
+            
+            data_format = workbook.add_format({
+                'align': 'center',
+                'border': 1,
+                'text_wrap': True
+            })
+
+            header_format = workbook.add_format({
+                'bold': True,
+                'align': 'center',
+                'bg_color': '#DDEBF7',
+                'border': 1,
+                'text_wrap': True
+            })  
+
+            row = 0
+            for i, header in enumerate(headers):
+                worksheet.write(row, i, header, header_format)
+
+            row = 1
+            for pair in pairs:
+                target_well_analysis = analysis_service.get_by_name(pair[0])
+                target_well_information = target_well_information_service.get_by_name(pair[0])
+                offset_well_analysis = analysis_service.get_by_name(pair[1])
+                offset_well = well_service.get_by_api(offset_well_analysis.api)
+                overlap = self.calculate_overlap(target_well_analysis, offset_well_analysis)
+                worksheet.write(row, 0, ref_index[target_well_analysis.name], data_format)
+                worksheet.write(row, 1, ref_index[offset_well_analysis.name], data_format)
+                worksheet.write(row, 2, target_well_analysis.name, data_format)
+                worksheet.write(row, 3, offset_well_analysis.name, data_format)
+                worksheet.write(row, 4, target_well_analysis.first_production_date, data_format)
+                worksheet.write(row, 5, offset_well_analysis.first_production_date, data_format)
+                worksheet.write(row, 6, "TBD", data_format)
+                worksheet.write(row, 7, target_well_information.perf_interval_ft, data_format)
+                perf_interval = offset_well.lateral_length if offset_well.perf_interval is None else offset_well.perf_interval
+                worksheet.write(row, 8, perf_interval, data_format)
+                worksheet.write(row, 9, offset_well.last_producing_month, data_format)
+                worksheet.write(row, 10, overlap["overlap_feet"], data_format)
+                worksheet.write(row, 11, overlap["overlap_percentage"], data_format)
+                worksheet.write(row, 12, offset_well.cumlative_oil, data_format)
+                cumulative_oil_per_ft = math.ceil(offset_well.cumlative_oil / perf_interval)
+                worksheet.write(row, 13, cumulative_oil_per_ft, data_format)
+                overlap_cumulative_oil_ft = math.ceil(overlap["overlap_percentage"] * (cumulative_oil_per_ft/100))
+                worksheet.write(row, 14, overlap_cumulative_oil_ft, data_format)
+                months_from_first_production_date = self.months_between_dates(offset_well_analysis.first_production_date, target_well_analysis.first_production_date)
+                worksheet.write(row, 15, months_from_first_production_date, data_format)
+                adjacent = int(abs(offset_well_analysis.gun_barrel_x - target_well_analysis.gun_barrel_x))
+                opposite = int(abs(offset_well_analysis.subsurface_depth - target_well_analysis.subsurface_depth))
+                hypotenuse = int(math.sqrt(adjacent**2 + opposite**2))
+                worksheet.write(row, 16, adjacent, data_format)
+                worksheet.write(row, 17, opposite, data_format)
+                worksheet.write(row, 18, hypotenuse, data_format)
+                row = row + 1
+
+            worksheet.autofit()
+
+        except Exception as e:
+            raise e
         
+    def calculate_overlap(self, target_well: Analysis, offset_well: Analysis) -> dict:
+        try:
+            results = {}
+
+            if (target_well.dominant_direction == 'N' and offset_well.dominant_direction == 'S' or
+               target_well.dominant_direction == 'S' and offset_well.dominant_direction == 'N'):
+                    overlap = int(target_well.lateral_length)
+                    if target_well.lateral_end_grid_y - offset_well.lateral_start_grid_y > 0:
+                        overlap = overlap - int((target_well.lateral_end_grid_y - offset_well.lateral_start_grid_y))
+                    if target_well.lateral_start_grid_y - offset_well.lateral_end_grid_y < 0:
+                        overlap = overlap - int(abs(target_well.lateral_start_grid_y - offset_well.lateral_end_grid_y))
+                    overlap_percentage = math.ceil((overlap/target_well.lateral_length)*100)
+                    results["overlap_feet"] = overlap
+                    results["overlap_percentage"] = overlap_percentage
+            if (target_well.dominant_direction == 'N' and offset_well.dominant_direction == 'N' or 
+               target_well.dominant_direction == 'S' and offset_well.dominant_direction == 'S'):
+                overlap = int(target_well.lateral_length)
+                if target_well.lateral_end_grid_y - offset_well.lateral_end_grid_y > 0:
+                    overlap = overlap - int((target_well.lateral_end_grid_y - offset_well.lateral_end_grid_y))
+                if target_well.lateral_start_grid_y - offset_well.lateral_start_grid_y < 0:
+                    overlap = overlap - int(abs(target_well.lateral_start_grid_y - offset_well.lateral_start_grid_y))
+                overlap_percentage = math.ceil((overlap/target_well.lateral_length)*100)
+                results["overlap_feet"] = overlap
+                results["overlap_percentage"] = overlap_percentage
+            if (target_well.dominant_direction == 'E' and offset_well.dominant_direction == 'W' or
+                target_well.dominant_direction == 'W' and offset_well.dominant_direction == 'E'):
+                overlap = int(target_well.lateral_length)
+                if target_well.lateral_end_grid_x - offset_well.lateral_start_grid_x > 0:
+                    overlap = overlap - int((target_well.lateral_end_grid_x - offset_well.lateral_start_grid_x))
+                if target_well.lateral_start_grid_x - offset_well.lateral_end_grid_x < 0:
+                    overlap = overlap - int(abs(target_well.lateral_start_grid_x - offset_well.lateral_end_grid_x))
+                overlap_percentage = math.ceil((overlap/target_well.lateral_length)*100)
+                results["overlap_feet"] = overlap
+                results["overlap_percentage"] = overlap_percentage
+            if (target_well.dominant_direction == 'E' and offset_well.dominant_direction == 'E' or  
+                target_well.dominant_direction == 'W' and offset_well.dominant_direction == 'W'):
+                overlap = int(target_well.lateral_length)
+                if target_well.lateral_end_grid_x - offset_well.lateral_end_grid_x > 0:
+                    overlap = overlap - int((target_well.lateral_end_grid_x - offset_well.lateral_end_grid_x))
+                if target_well.lateral_start_grid_x - offset_well.lateral_start_grid_x < 0:
+                    overlap = overlap - int(abs(target_well.lateral_start_grid_x - offset_well.lateral_start_grid_x))
+                overlap_percentage = math.ceil((overlap/target_well.lateral_length)*100)
+                results["overlap_feet"] = overlap
+                results["overlap_percentage"] = overlap_percentage
+
+            return results
+        except Exception as e:
+            raise e
+
+    def months_between_dates(self, start_date:str, end_date:str) -> int:
+        # Convert string inputs to datetime objects if necessary
+        if isinstance(start_date, str):
+            start_date = datetime.strptime(start_date, '%Y-%m-%d')
+        if isinstance(end_date, str):
+            end_date = datetime.strptime(end_date, '%Y-%m-%d')
+
+        # Calculate the difference between the two dates
+        delta = relativedelta(end_date, start_date)
+
+        # Return the total number of months (years * 12 + months)
+        return delta.years * 12 + delta.months
+    
     def execute(self):
         task = TASKS.CREATE_EXCEL_NATIVE_GUN_BARREL_PLOT.value
         logger = task_logger(task, self.context.logs_path)
@@ -485,13 +640,20 @@ class CreateExcelNativeGunBarrelPlot(Task):
             # Main script
             workbook = Workbook(output_file)
 
-            ref_index, target_well_series_1, target_well_series_2, other_well_series_1, other_well_series_2 = self.create_plot_data_worksheet(workbook, target_wells, other_wells)
+            plot_worksheet = workbook.add_worksheet("Plot")
+            well_data_worksheet = workbook.add_worksheet("Well Data")
+            plot_data_worksheet = workbook.add_worksheet("Plot Data")
+            calculated_data_worksheet = workbook.add_worksheet("Calculated Data")
+            line_series_data_worksheet = workbook.add_worksheet("Line Series")
 
-            self.create_well_data_worksheet(workbook, well_service, ref_index, other_wells)
+            ref_index, target_well_series_1, target_well_series_2, other_well_series_1, other_well_series_2 = self.create_plot_data_worksheet(workbook, plot_data_worksheet, target_wells, other_wells)
 
-            line_series = self.create_calculated_data_worksheet(workbook, ref_index, target_wells, other_wells)    
+            self.create_well_data_worksheet(workbook, well_data_worksheet, well_service, ref_index, other_wells)
+
+            line_series, pairs = self.create_line_series_data_worksheet(workbook, line_series_data_worksheet, ref_index, target_wells, other_wells)    
 
             self.create_plot(workbook, 
+                             plot_worksheet,
                              plot_title, 
                              section_line_label, 
                              target_well_series_1, 
@@ -499,6 +661,14 @@ class CreateExcelNativeGunBarrelPlot(Task):
                              other_well_series_1,
                              other_well_series_2,
                              line_series)   
+
+            self.create_calulated_data_worksheet(workbook, 
+                                                 calculated_data_worksheet, 
+                                                 pairs, 
+                                                 ref_index, 
+                                                 analysis_service,
+                                                 target_well_information_service,
+                                                 well_service)
 
             # Close the workbook
             workbook.close()
