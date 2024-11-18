@@ -45,6 +45,8 @@ class CreateExcelNativeGunBarrelPlot(Task):
                                 second_count += 1
                                 if offset_well_analysis.subsurface_depth < -6000 and offset_well_analysis.subsurface_depth > -8500:
                                     third_count += 1
+                                    if offset_well_analysis.gun_barrel_x is None:
+                                        offset_well_analysis.gun_barrel_x = offset_well.end_x
                                     if "11-111" in offset_well_analysis.api:
                                         target_wells.append(offset_well_analysis)
                                     else:
@@ -68,34 +70,6 @@ class CreateExcelNativeGunBarrelPlot(Task):
             # print(f"Second count: {second_count}")
             # print(f"Third count: {third_count}")
             return target_wells, other_wells
-        except Exception as e:
-            raise e
-        
-    def create_plot_data(self, 
-                         workbook: Workbook, 
-                         target_well_information_service: TargetWellInformationService,
-                         analysis_service: AnalysisService):
-        try:
-            worksheet = workbook.add_worksheet("Plot Data")
-            worksheet.write(0, 0, "Ref")
-            worksheet.write(0, 1, "API")
-            worksheet.write(0, 2, "Name")
-            worksheet.write(0, 3, "X")
-            worksheet.write(0, 4, "Y")
-            target_wells = target_well_information_service.get_all()
-            for target_well in target_wells:
-                analysis = analysis_service.get_by_name(target_well.name)
-                worksheet.write(target_well.id, 0, target_well.id)
-                worksheet.write(target_well.id, 1, target_well.api)
-                worksheet.write(target_well.id, 2, target_well.name)
-                worksheet.write(target_well.id, 3, analysis.gun_barrel_x)
-                worksheet.write(target_well.id, 4, analysis.subsurface_depth)
-
-            # categories_range = f"='Plot Data'!$A$2:$A${len(target) + 1}"  # X-values
-            # values_range = f"='Plot Data'!$B$2:$B${len(depth) + 1}"       # Y-values
-            # labels_range = f"='Plot Data'!$C$2:$C${len(labels) + 1}" if labels else None  # Label range
-            # return categories_range, values_range, labels_range
-    
         except Exception as e:
             raise e
 
@@ -132,7 +106,24 @@ class CreateExcelNativeGunBarrelPlot(Task):
             "data_labels": {"value": True,"position": "center","custom": [{"value": lbl, "index": lbl} for lbl in labels],}
         }
 
-        return target_well_series
+        first_row, row = last_row + 1, last_row
+        for well in other_wells:
+            worksheet.write(row, 0, row)
+            labels.append(row)
+            worksheet.write(row, 1, well.api)
+            worksheet.write(row, 2, well.name)
+            worksheet.write(row, 3, well.gun_barrel_x)
+            worksheet.write(row, 4, well.subsurface_depth)
+            row = row + 1
+        last_row = row
+        other_well_series = {
+            "categories": f"='Plot Data'!$D${first_row}:$D${last_row}",         # Dynamic X-values
+            "values": f"='Plot Data'!$E${first_row}:$E${last_row}",             # Dynamic Y-values
+            "marker": {"type": "circle", "size": 12, "fill": {"color": "green"}},
+            "data_labels": {"value": True,"position": "center","custom": [{"value": lbl, "index": lbl} for lbl in labels],}
+        }
+
+        return target_well_series, other_well_series
 
     def section_line_label(self, target_well: TargetWellInformation):
         try:
@@ -179,7 +170,12 @@ class CreateExcelNativeGunBarrelPlot(Task):
 
         return vertical_line_categories, vertical_line_values, annotation_categories, annotation_values
 
-    def create_plot(self, workbook: Workbook, title: str, section_line_label: str, target_well_series: dict):
+    def create_plot(self, 
+                    workbook: Workbook, 
+                    title: str, 
+                    section_line_label: str, 
+                    target_well_series: dict,
+                    other_well_series: dict):
         try:
             # Create a scatter chart
             plot = workbook.add_chart({"type": "scatter"})
@@ -243,8 +239,8 @@ class CreateExcelNativeGunBarrelPlot(Task):
                 },
             })
 
-            # Add dynamic series for the main data with optional labels
             plot.add_series(target_well_series)
+            plot.add_series(other_well_series)
 
             plot_worksheet = workbook.add_worksheet("Plot")
             plot_worksheet.insert_chart("B4", plot)
@@ -273,9 +269,9 @@ class CreateExcelNativeGunBarrelPlot(Task):
             # Main script
             workbook = Workbook(output_file)
 
-            target_well_series = self.create_plot_data_worksheet(workbook, target_wells, other_wells)
+            target_well_series, other_well_series = self.create_plot_data_worksheet(workbook, target_wells, other_wells)
 
-            self.create_plot(workbook, plot_title, section_line_label, target_well_series)
+            self.create_plot(workbook, plot_title, section_line_label, target_well_series, other_well_series)
 
             # Close the workbook
             workbook.close()
