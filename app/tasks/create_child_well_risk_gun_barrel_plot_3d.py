@@ -4,6 +4,7 @@ from helpers import task_logger, adjust_coordinate, latlon_to_utm_feet
 from services import (AnalysisService, 
                       SurveyService, 
                       TexasLandSurveySystemService,
+                      NewMexicoLandSurveySystemService,
                       TargetWellInformationService)
 from traceback import format_exc
 import matplotlib.pyplot as plt
@@ -20,11 +21,12 @@ class CreateChildWellRiskGunBarrelPlot3D(Task):
         try:
             analysis_service = AnalysisService(db_path=self.context.db_path)
             survey_service = SurveyService(db_path=self.context.db_path)
-            tlss_service = TexasLandSurveySystemService(self.context._texas_land_survey_system_database_path)
+            texas_land_survey_system_service = TexasLandSurveySystemService(self.context._texas_land_survey_system_database_path)
+            new_mexico_land_survey_system_service = NewMexicoLandSurveySystemService(self.context._new_mexico_land_survey_system_database_path)             
             target_well_information_service = TargetWellInformationService(self.context.db_path)
 
             # Create the 3D plot with different colors for each well
-            fig = plt.figure(figsize=(15, 8), facecolor=BACKGROUND_COLOR)
+            fig = plt.figure(figsize=(16, 10), facecolor=BACKGROUND_COLOR)
             ax = fig.add_subplot(111, projection='3d')
 
             # Rotate the plot 45 degrees to the right along the X-axis
@@ -43,18 +45,34 @@ class CreateChildWellRiskGunBarrelPlot3D(Task):
 
             # Plot the tlss line
             target_well = target_well_information_service.get_first_row()
-            tlss = tlss_service.get_by_county_abstract(county=target_well.county, abstract=target_well.tx_abstract_southwest_corner)
-            start = adjust_coordinate(tlss.southwest_latitude, tlss.southwest_longitude, 2640, "W")
-            end = adjust_coordinate(tlss.southwest_latitude, tlss.southwest_longitude, 7920, "E")
-            
-            tlss_start_grid_x, tlss_start_grid_y = latlon_to_utm_feet(start[0], start[1])
-            tlss_end_grid_x, tlss_end_grid_y = latlon_to_utm_feet(end[0], end[1])
 
-            tlss_grid_x = np.array([tlss_start_grid_x, tlss_end_grid_x])
-            tlss_grid_y = np.array([tlss_start_grid_y, tlss_end_grid_y])
-            tlss_subsurface_depth = np.array([z_min, z_min])
-            section_label = f"{target_well.state.capitalize()}/{tlss.county}/{tlss.abstract}/{tlss.block}/{int(tlss.section)} (section line)"
-            ax.plot(tlss_grid_x, tlss_grid_y, tlss_subsurface_depth, color='r', label=section_label)
+            # Set axis labels
+            if target_well.state == "TX":
+                section_label = f"{target_well.state}/{target_well.county}/{target_well.tx_abstract_southwest_corner}/{target_well.tx_block_southwest_corner}/{int(float(target_well.nm_tx_section_southwest_corner))}) (100 ft intervals)"
+                plss = texas_land_survey_system_service.get_by_county_abstract_block_section(target_well.county, target_well.tx_abstract_southwest_corner, target_well.tx_block_southwest_corner, str(int(float(target_well.nm_tx_section_southwest_corner))))            
+                if plss:
+                    fnl_grid_x, fnl_grid_y = latlon_to_utm_feet(plss.northeast_latitude, plss.northeast_longitude)
+            elif target_well.state == "NM":
+                section_label = f"{target_well.state}/{target_well.county}/{target_well.nw_township_southwest_corner}/{target_well.nm_range_southwest_corner}/{int(float(target_well.nm_tx_section_southwest_corner))}) (100 ft intervals)"
+                township = int(target_well.nw_township_southwest_corner[:-1])
+                township_direction = target_well.nw_township_southwest_corner[-1]
+                nm_range = int(target_well.nm_range_southwest_corner[:-1])
+                range_direction = target_well.nm_range_southwest_corner[-1]
+                section = int(target_well.nm_tx_section_southwest_corner)
+                plss = new_mexico_land_survey_system_service.get_by_township_range_section(township=township, township_direction=township_direction, range=nm_range, range_direction=range_direction, section=section)            
+                if plss:
+                    fnl_grid_x, fnl_grid_y = latlon_to_utm_feet(plss.northeast_latitude, plss.northeast_longitude)
+
+            start = adjust_coordinate(plss.southwest_latitude, plss.southwest_longitude, 2640, "W")
+            end = adjust_coordinate(plss.southwest_latitude, plss.southwest_longitude, 7920, "E")
+
+            plss_start_grid_x, plss_start_grid_y = latlon_to_utm_feet(start[0], start[1])
+            plss_end_grid_x, plss_end_grid_y = latlon_to_utm_feet(end[0], end[1])
+
+            plss_grid_x = np.array([plss_start_grid_x, plss_end_grid_x])
+            plss_grid_y = np.array([plss_start_grid_y, plss_end_grid_y])
+            plss_subsurface_depth = np.array([z_min, z_min])
+            ax.plot(plss_grid_x, plss_grid_y, plss_subsurface_depth, color='r', label=section_label)
 
             # Labels and title
             ax.set_xlabel('2640 ft intervals from section line (red)')
@@ -103,7 +121,7 @@ class CreateChildWellRiskGunBarrelPlot3D(Task):
             ax.legend(loc='center left', bbox_to_anchor=(-0.6, 0.5))
 
             # Save the plot
-            plot_name = "child-well-risk"
+            plot_name = ""
             output_file = os.path.join(self.context.project_path, f"{self.context.project}-{plot_name}-3d-gun-barrel-plot-{self.context.version}.png")
             plt.savefig(output_file)
 

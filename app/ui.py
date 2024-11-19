@@ -24,7 +24,7 @@ app.secret_key = os.urandom(24)  # Set a random secret key for session handling
 files_index = AutoIndex(app, browse_root=os.getenv("PROJECTS_PATH"), add_url_rules=False)
 
 # Set the maximum upload file size to 25 MB
-app.config['MAX_CONTENT_LENGTH'] = 25 * 1024 * 1024  # 25 MB
+app.config['MAX_CONTENT_LENGTH'] = 50 * 1024 * 1024  # 25 MB
 
 @app.template_filter('timestamp_to_date')
 def timestamp_to_date(timestamp):
@@ -87,6 +87,8 @@ def upload():
 
         os.makedirs(context.well_data_path, exist_ok=True)
         os.makedirs(context.survey_data_path, exist_ok=True)
+        if os.path.exists(context.logs_path):
+            shutil.rmtree(context.logs_path)
         os.makedirs(context.logs_path, exist_ok=True)
 
         context.db_path = os.path.join(context.logs_path, f"{context.project}-{context.version}.db")
@@ -102,6 +104,10 @@ def upload():
             os.makedirs(context.target_well_information_path, exist_ok=True)    
             context.target_well_information_file = os.path.join(context.target_well_information_path, secure_filename(target_well_information.filename))
             target_well_information.save(context.target_well_information_file)
+
+        for state in ['RUNNING', 'COMPLETED', 'ERROR']:
+            if os.path.exists(os.path.join(context.project_path, state)):
+                os.remove(os.path.join(context.project_path, state))
 
         workflow_manager = WorkflowManager(context=context)
         try:
