@@ -132,7 +132,7 @@ resource "aws_lightsail_instance" "instance" {
 
             server_name _;
 
-            client_max_body_size 25M;
+            client_max_body_size 50M;
             
             location / {
                 auth_basic "Restricted Access";
