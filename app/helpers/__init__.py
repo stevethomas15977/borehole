@@ -64,3 +64,15 @@ from .gun_barrel_plot_helper import (plot_hypothenuse,
 from .overlap_helper import (are_lengths_similar)
 
 from .workflow_help import (write_to_file)
+
+from .excel_native_gun_barrel_plot_helper import (is_within_range,
+                                                  wells_to_plot,
+                                                  create_well_data_worksheet,
+                                                  create_plot_data_worksheet,
+                                                  create_plot_support_data,
+                                                  create_line_series_data_worksheet,
+                                                  create_plot,
+                                                  create_section_line_label,
+                                                  create_calulated_data_worksheet,
+                                                  calculate_overlap,
+                                                  months_between_dates)

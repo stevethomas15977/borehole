@@ -34,6 +34,8 @@ def load_wells(db_path:str , file_path: str) -> None:
             status = row["ENVWellStatus"]
             lease = row["LeaseName"]
             interval = row["ENVInterval"]
+            if "DELAWARE VERTICAL" == interval:
+                continue
             formation = row["Formation"]
             first_production_date = str(row["FirstProdDate"].strftime("%Y-%m-%d"))
             surface_latitude = row["Latitude"]

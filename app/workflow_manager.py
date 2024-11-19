@@ -66,7 +66,7 @@ class WorkflowManager:
         # workgroup.add_task(TASKS.CREATE_GUN_BARREL_SURFACE_MAP.value)
         # workgroup.add_task(TASKS.CREATE_CHILD_WELL_RISK_GUN_BARREL_PLOT_3D.value)
         workgroup.add_task(TASKS.CREATE_EXCEL_NATIVE_GUN_BARREL_PLOT.value)
-        if self._context.target_well_information_file:
+        if self._context.target_well_information_file:                        
             workgroup.run()
 
     @property
@@ -79,7 +79,7 @@ class WorkflowManager:
         self._factory = TaskFactory(self._context)
 
 if __name__ == "__main__":
-    context = Context().dragonfly_5_mile()
+    context = Context().cobra_5_mile()
     workflow_manager = WorkflowManager(context)
     # workflow_manager.project_initiation_workflow()
     # workflow_manager.base_workflow()
