@@ -69,3 +69,14 @@ class StratigraphicRepository:
             raise ValueError(f"Unable to get target well information: {e}")
         finally:
             cursor.close()
+
+    def get_union_codes(self) -> list[str]:
+        try:
+            cursor = Cursor(self.connection)
+            cursor.execute(AFEDB.SQL.SELECT_STRATIGRAPHIC_UNION_CODES.value)
+            rows = cursor.fetchall()
+            return [row[0] for row in rows]
+        except DatabaseError as e:
+            raise ValueError(f"Unable to get union codes {e}")
+        finally:
+            cursor.close()

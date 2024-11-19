@@ -15,4 +15,6 @@ class StratigraphicService:
     def get_by_prism_code(self, prism_code) -> Stratigraphic:
         return self.repository.get_by_prism_code(prism_code=prism_code)
     
+    def get_union_codes(self) -> list[str]:
+        return self.repository.get_union_codes()
 

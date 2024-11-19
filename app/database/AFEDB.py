@@ -38,7 +38,9 @@ class AFEDB:
         DROP_STRATIGRAPHIC_COMMON_TANKS_TABLE = """DROP TABLE IF EXISTS stratigraphic_common_tanks"""
 
         SELECT_STRATIGRAPHIC_COMMON_TANKS_BY_UNION_CODE = """SELECT * FROM stratigraphic_common_tanks WHERE union_code = ?"""
-
+ 
+        SELECT_STRATIGRAPHIC_UNION_CODES = """SELECT union_code FROM stratigraphic ORDER BY position ASC"""
+        
         ####### Target Well Information Table ########
         CREATE_TARGET_WELL_INFORMATION_TABLE = """
             CREATE TABLE IF NOT EXISTS target_well_information (
