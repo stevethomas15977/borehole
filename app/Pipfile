@@ -39,6 +39,7 @@ boto3 = "*"
 pyarrow = "*"
 mplcursors = "*"
 utm = "*"
+xlsxwriter = "*"
 
 [dev-packages]
 
