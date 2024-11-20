@@ -63,7 +63,6 @@ class WorkflowManager:
         workgroup.add_task(TASKS.ENRICH_GUN_BARREL.value)
         workgroup.add_task(TASKS.CREATE_GUN_BARREL_PLOT.value)
         workgroup.add_task(TASKS.CREATE_CROSS_PLOT.value)
-        workgroup.add_task(TASKS.CREATE_GUN_BARREL_SURFACE_MAP.value)
         workgroup.add_task(TASKS.CREATE_CHILD_WELL_RISK_GUN_BARREL_PLOT_3D.value)
         workgroup.add_task(TASKS.CREATE_EXCEL_NATIVE_GUN_BARREL_PLOT.value)
         if self._context.target_well_information_file:                        
