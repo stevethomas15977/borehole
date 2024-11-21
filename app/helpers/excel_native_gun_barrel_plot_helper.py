@@ -900,7 +900,7 @@ def create_3d_plot(context: Context,
                                 color='black', 
                                 marker='o',
                                 markersize=12,
-                                label=f"Section Line {section_label}"))
+                                label=f"{section_label}"))
         
         handles.append(mlines.Line2D([], [], 
                                 color='orange', 
