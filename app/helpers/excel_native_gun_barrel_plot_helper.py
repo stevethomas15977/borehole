@@ -783,6 +783,7 @@ def create_surface_map(context: Context,
 
         # Insert the image into the worksheet
         worksheet.insert_image('B2', image_file) 
+        worksheet.set_zoom(150)
 
     except Exception as e:
         raise e
