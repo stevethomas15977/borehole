@@ -6,8 +6,7 @@
     <title>{{ app }} - {{ version }} - {{ server }}</title>
 </head>
 <body>
-    <h2>Welcome to AFE Aanlysis Tools on {{ env }}</h2>
-    <p>Version: {{ version }} running on AWS Lightsail</p>
+    <h2>AFE Aanlysis Tools</h2>
 
     {% with messages = get_flashed_messages() %}
         {% if messages %}
@@ -28,13 +27,13 @@
         <label for="survey-data">Survey Data (.xlsx):</label>
         <input type="file" id="survey-data" name="survey-data" accept=".xlsx"><br>
 
-        <p>Optional: Attach the Target Well Information Excel spreadsheet.</p>
+        <p>Optional</p>
         <label for="target-well-information">Target Well Information (.xlsx):</label>
         <input type="file" id="target-well-information" name="target-well-information" accept=".xlsx"><br><br>
         <input type="submit" value="Upload and Launch">
     </form>
     <br>
-    <a href="/projects" target="_blank">Click here to view projects</a> 
+    <a style="font-size: 30px;" href="/projects" target="_blank">Click to go to Projects</a>
     <br><br>
     <a href="https://stevethomascpapublic.s3.amazonaws.com/target_well_information-TEMPLATE.xlsx" target="_blank">
         Download a copy of Target Well Information Template v1.6.x
@@ -54,5 +53,7 @@
     <ul>
         <li>Change landing zone colors</li>
     </ul>
+    <br>
+    <p style="font-size: 15px;">Version: {{ version }} running on AWS Lightsail</p>
 </body>
 </html>
