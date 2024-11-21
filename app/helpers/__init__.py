@@ -76,4 +76,5 @@ from .excel_native_gun_barrel_plot_helper import (is_within_range,
                                                   create_calulated_data_worksheet,
                                                   calculate_overlap,
                                                   months_between_dates,
-                                                  create_surface_map)
+                                                  create_surface_map,
+                                                  create_3d_plot)

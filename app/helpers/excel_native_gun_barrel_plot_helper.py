@@ -1,6 +1,7 @@
 from helpers import (new_mexico_plss_overlay, 
                      texas_plss_block_section_overlay,
-                     adjust_coordinate)
+                     adjust_coordinate,
+                     latlon_to_utm_feet)
 from services import (AnalysisService, 
                       TargetWellInformationService, 
                       WellService,
@@ -19,6 +20,9 @@ from context import Context
 from folium import Map, PolyLine, Element, Marker, DivIcon
 from PIL import Image
 from html2image import Html2Image
+import matplotlib.pyplot as plt
+import matplotlib.lines as mlines
+import numpy as np
 
 def is_within_range(start: float, end: float, test: float) -> bool:
     lower_bound = min(start, end)
@@ -784,6 +788,146 @@ def create_surface_map(context: Context,
         # Insert the image into the worksheet
         worksheet.insert_image('B2', image_file) 
         worksheet.set_zoom(150)
+
+    except Exception as e:
+        raise e
+        
+def create_3d_plot(context: Context,
+                   worksheet: worksheet,   
+                   target_well_information: TargetWellInformation,
+                   ref_index: dict,
+                   target_wells: list[Analysis],
+                   other_wells: list[Analysis]):
+    
+    try:            
+        analysis_service = AnalysisService(db_path=context.db_path)
+        survey_service = SurveyService(db_path=context.db_path)
+        texas_land_survey_system_service = TexasLandSurveySystemService(context._texas_land_survey_system_database_path)
+        new_mexico_land_survey_system_service = NewMexicoLandSurveySystemService(context._new_mexico_land_survey_system_database_path)             
+        target_well_information_service = TargetWellInformationService(context.db_path)
+        stratigraphic_service = StratigraphicService(context.db_path)
+
+        # Create the 3D plot with different colors for each well
+        fig = plt.figure(figsize=(16, 10), facecolor="white")
+        ax = fig.add_subplot(111, projection='3d')
+
+        # Rotate the plot 45 degrees to the right along the X-axis
+        ax.view_init(elev=30, azim=55)  # You can adjust the 'elev' as needed
+        
+        # Set the z-axis limits
+        z_min = -8000
+        z_max = 2000
+        ax.set_zlim(z_min, z_max)
+
+        # Define function to scale the coordinates within the plot limits
+        def scale_values(values, min_limit, max_limit):
+            min_val = min(values)
+            max_val = max(values)
+            return [(max_limit - min_limit) * (v - min_val) / (max_val - min_val) + min_limit for v in values]
+
+        # Plot the tlss line
+        target_well = target_well_information
+
+        # Set axis labels
+        if target_well.state == "TX":
+            section_label = f"Section Line - {target_well.tx_abstract_southwest_corner}/{target_well.tx_block_southwest_corner}/{int(float(target_well.nm_tx_section_southwest_corner))}"
+            plss = texas_land_survey_system_service.get_by_county_abstract_block_section(target_well.county, target_well.tx_abstract_southwest_corner, target_well.tx_block_southwest_corner, str(int(float(target_well.nm_tx_section_southwest_corner))))        
+        elif target_well.state == "NM":
+            section_label = f"Section Line - {target_well.nw_township_southwest_corner}/{target_well.nm_range_southwest_corner}/{int(float(target_well.nm_tx_section_southwest_corner))}"
+            township = int(target_well.nw_township_southwest_corner[:-1])
+            township_direction = target_well.nw_township_southwest_corner[-1]
+            nm_range = int(target_well.nm_range_southwest_corner[:-1])
+            range_direction = target_well.nm_range_southwest_corner[-1]
+            section = int(target_well.nm_tx_section_southwest_corner)
+            plss = new_mexico_land_survey_system_service.get_by_township_range_section(township=township, township_direction=township_direction, range=nm_range, range_direction=range_direction, section=section)            
+
+        start = adjust_coordinate(plss.southwest_latitude, plss.southwest_longitude, 2640, "W")
+        end = adjust_coordinate(plss.southwest_latitude, plss.southwest_longitude, 7920, "E")
+
+        plss_start_grid_x, plss_start_grid_y = latlon_to_utm_feet(start[0], start[1])
+        plss_end_grid_x, plss_end_grid_y = latlon_to_utm_feet(end[0], end[1])
+
+        plss_grid_x = np.array([plss_start_grid_x, plss_end_grid_x])
+        plss_grid_y = np.array([plss_start_grid_y, plss_end_grid_y])
+        plss_subsurface_depth = np.array([z_min, z_min])
+        ax.plot(plss_grid_x, plss_grid_y, plss_subsurface_depth, color='black', label=section_label)
+
+        # Labels and title
+        ax.set_xlabel('2640 ft intervals')
+        ax.set_xticklabels([])
+        ax.set_ylabel('5000 ft intervals')
+        ax.set_yticklabels([])
+        ax.set_zlabel('2000 ft intervals')
+
+        title = f"{context.project.capitalize()} 3D Barrel Plot ({context.version})"
+        ax.set_title(title, fontsize=12, fontweight='bold')
+        
+        # Plot the offset wells
+        save_i = 0
+        offsets = other_wells
+        for offset in offsets:
+            surveys = survey_service.get_by_api(offset.api)
+            stratigraphic = stratigraphic_service.get_by_union_code(offset.interval)
+
+            # Ensure that surveys contain iterable data for plotting
+            grid_x = [s.grid_x for s in surveys]
+            grid_y = [s.grid_y for s in surveys]
+            subsurface_depth = [s.subsurface_depth for s in surveys]
+
+            # Plot the well trajectory with a unique color and label
+            ax.plot(grid_x, grid_y, subsurface_depth, color=f'{stratigraphic.color}', label=None)
+
+            # Annotate the last survey with the index   
+            if surveys:
+                last_index = len(surveys) - 1
+                # Ensure the last survey has the necessary attributes
+                if hasattr(surveys[last_index], 'grid_x') and hasattr(surveys[last_index], 'grid_y') and hasattr(surveys[last_index], 'subsurface_depth'):
+                    ax.text(surveys[last_index].grid_x, surveys[last_index].grid_y, surveys[last_index].subsurface_depth, f'{ref_index[offset.name]}', color='black', weight='bold') 
+
+        # Plot the target wells
+        for target_well in target_wells:
+            lookup = target_well_information_service.get_by_name(target_well.name)
+            surface_grid_x, surface_grid_y = latlon_to_utm_feet(lookup.latitude_surface_location, lookup.longitude_surface_location)
+            target_well_grid_x = np.array([surface_grid_x, target_well.lateral_start_grid_x, target_well.lateral_end_grid_x])
+            target_well_grid_y = np.array([surface_grid_y, target_well.lateral_start_grid_y, target_well.lateral_end_grid_y])
+            target_well_subsurface_depth = np.array([lookup.enverus_rkb_elevation_ft, target_well.subsurface_depth, target_well.subsurface_depth])
+            ax.plot(target_well_grid_x, target_well_grid_y, target_well_subsurface_depth, color='orange', label=None)
+            ax.text(target_well.lateral_end_grid_x, target_well.lateral_end_grid_y, target_well.subsurface_depth, f'{ref_index[target_well.name]}', color='black', weight='bold') 
+
+
+        handles = []
+        handles.append(mlines.Line2D([], [], 
+                                color='black', 
+                                marker='o',
+                                markersize=12,
+                                label=f"Section Line {section_label}"))
+        
+        handles.append(mlines.Line2D([], [], 
+                                color='orange', 
+                                marker='o',
+                                markersize=12,
+                                label=f"Target Well - {target_well_information.afe_landing_zone}"))
+        
+        lzs = set()
+        for other_well in other_wells:
+            lzs.add(other_well.interval)
+        for lz in lzs:
+            stratigraphic = stratigraphic_service.get_by_union_code(lz)
+            color = stratigraphic.color if stratigraphic is not None else "green"
+            handles.append(mlines.Line2D([], [],
+                                    marker='o',
+                                    markersize=12,
+                                    color=color,
+                                    label=f"{lz}"))   
+        
+        plt.legend(handles=handles, loc='center left', bbox_to_anchor=(-0.5, 0.5))
+
+        # Save the plot
+        output_file = os.path.join(context.logs_path, f"{context.project}-3d-barrel-plot-{context.version}.png")
+        plt.savefig(output_file)
+
+        worksheet.insert_image('B2', output_file) 
+        # worksheet.set_zoom(100)
 
     except Exception as e:
         raise e

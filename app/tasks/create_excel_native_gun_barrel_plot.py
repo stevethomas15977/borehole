@@ -16,7 +16,8 @@ from helpers import (task_logger,
                     create_calulated_data_worksheet,
                     calculate_overlap,
                     months_between_dates,
-                    create_surface_map)
+                    create_surface_map,
+                    create_3d_plot)
 
 from services import (AnalysisService, 
                       TargetWellInformationService, 
@@ -58,6 +59,7 @@ class CreateExcelNativeGunBarrelPlot(Task):
             well_data_worksheet = workbook.add_worksheet("Well Data")
             plot_data_worksheet = workbook.add_worksheet("Plot Data")
             surface_map_worksheet = workbook.add_worksheet("Surface Map")
+            three_d_plot_worksheet = workbook.add_worksheet("3D Plot")
             calculated_data_worksheet = workbook.add_worksheet("Calculated Data")
             line_series_data_worksheet = workbook.add_worksheet("Line Series")
 
@@ -96,6 +98,14 @@ class CreateExcelNativeGunBarrelPlot(Task):
                                target_wells,
                                other_wells)
 
+            # Create 3D plot
+            create_3d_plot(self.context, 
+                           three_d_plot_worksheet,
+                           target_well_information_service.get_first_row(),
+                           ref_index,
+                           target_wells,
+                           other_wells)
+            
             # Close the workbook
             workbook.close()
             print("Oil barrel plot with dynamic and static data created.")
