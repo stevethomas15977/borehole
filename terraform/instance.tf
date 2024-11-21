@@ -77,7 +77,7 @@ resource "aws_lightsail_instance" "instance" {
 
         sh -c "cat > $APP_PATH/.env" <<EOG
         PYTHONPATH="$PYTHONPATH:models:helpers:services:database"
-        VERSION="1.7.5.2"
+        VERSION="1.7.5.3"
         ENV="$ENV"
         APP="$APP"
         APP_ROOT="$APP_ROOT"

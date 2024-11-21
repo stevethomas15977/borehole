@@ -760,9 +760,9 @@ def create_surface_map(context: Context,
         html_file = os.path.join(context.logs_path, f"{context.project}-gun-barrel-surface-map-{context.version}.html")
         image_file = os.path.join(context.logs_path, f"{context.project}-gun-barrel-surface-map-{context.version}.png")
         map.save(html_file)
-        img_data = map._to_png()
-        img = Image.open(io.BytesIO(img_data))
-        img.save(image_file)
+        # img_data = map._to_png()
+        # img = Image.open(io.BytesIO(img_data))
+        # img.save(image_file)
 
         # Insert the image into the worksheet
         worksheet.insert_image('B2', image_file) 
