@@ -15,17 +15,16 @@ from helpers import (task_logger,
                     create_section_line_label,
                     create_calulated_data_worksheet,
                     calculate_overlap,
-                    months_between_dates)
+                    months_between_dates,
+                    create_surface_map)
 
 from services import (AnalysisService, 
                       TargetWellInformationService, 
                       WellService,
-                      XYZDistanceService,
-                      OverlapService)
+                      XYZDistanceService)
 
 from models import (Analysis,
-                    XYZDistance, 
-                    Overlap, 
+                    XYZDistance,
                     TargetWellInformation)
 
 class CreateExcelNativeGunBarrelPlot(Task):
@@ -40,7 +39,6 @@ class CreateExcelNativeGunBarrelPlot(Task):
             analysis_service = AnalysisService(db_path=self.context.db_path)
             target_well_information_service = TargetWellInformationService(self.context.db_path)
             well_service = WellService(self.context.db_path)
-            overlap_service = OverlapService(self.context.db_path)
             xyz_distance_service = XYZDistanceService(self.context.db_path)
 
             shallowest = round((target_well_information_service.get_shallowest() - self.context.depth_distance_threshold) * -1, -3)
@@ -59,16 +57,18 @@ class CreateExcelNativeGunBarrelPlot(Task):
             plot_worksheet = workbook.add_worksheet("Plot")
             well_data_worksheet = workbook.add_worksheet("Well Data")
             plot_data_worksheet = workbook.add_worksheet("Plot Data")
+            surface_map_worksheet = workbook.add_worksheet("Surface Map")
             calculated_data_worksheet = workbook.add_worksheet("Calculated Data")
             line_series_data_worksheet = workbook.add_worksheet("Line Series")
 
-            ref_index, target_well_series_1, target_well_series_2, other_well_series_1, other_well_series_2 = create_plot_data_worksheet(workbook, plot_data_worksheet, target_wells, other_wells)
+            ref_index, target_well_series_1, target_well_series_2, other_well_series_1, other_well_series_2 = create_plot_data_worksheet(self.context, workbook, plot_data_worksheet, target_wells, other_wells)
 
             create_well_data_worksheet(workbook, well_data_worksheet, well_service, ref_index, other_wells)
 
             line_series, pairs = create_line_series_data_worksheet(self.context, workbook, line_series_data_worksheet, ref_index, target_wells, other_wells)    
             
-            create_plot(workbook, 
+            create_plot(self.context,
+                        workbook, 
                         plot_worksheet,
                         plot_title, 
                         section_line_label, 
@@ -87,6 +87,14 @@ class CreateExcelNativeGunBarrelPlot(Task):
                                             analysis_service,
                                             target_well_information_service,
                                             well_service)
+
+            # Create surface map
+            create_surface_map(self.context, 
+                               surface_map_worksheet, 
+                               target_well_information_service.get_first_row(),
+                               ref_index,
+                               target_wells,
+                               other_wells)
 
             # Close the workbook
             workbook.close()

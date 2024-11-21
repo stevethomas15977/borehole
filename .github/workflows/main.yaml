@@ -38,10 +38,12 @@ jobs:
             echo "AWS_ACCESS_KEY_ID=${{ vars.PROD_AWS_ACCESS_KEY_ID }}" >> $GITHUB_ENV
             echo "AWS_SECRET_ACCESS_KEY=${{ secrets.PROD_AWS_SECRET_ACCESS_KEY }}" >> $GITHUB_ENV
             echo "TF_VAR_env=afe-prod" >> $GITHUB_ENV
+            echo "TF_VAR_s3_bucket=afe-plss" >> $GITHUB_ENV
           else
             echo "AWS_ACCESS_KEY_ID=${{ vars.DEV_AWS_ACCESS_KEY_ID }}" >> $GITHUB_ENV
             echo "AWS_SECRET_ACCESS_KEY=${{ secrets.DEV_AWS_SECRET_ACCESS_KEY }}" >> $GITHUB_ENV
             echo "TF_VAR_env=afe-dev" >> $GITHUB_ENV
+            echo "TF_VAR_s3_bucket=afe-plss-dev" >> $GITHUB_ENV
           fi
 
       - name: Checkout

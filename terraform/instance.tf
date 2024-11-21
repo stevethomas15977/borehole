@@ -1,3 +1,8 @@
+# Create an access key for the Lightsail bucket
+resource "aws_lightsail_bucket_access_key" "offset-well-identification-lightsail-bucket-access-key" {
+  bucket_name = var.s3_bucket
+}
+
 # Create a new Lightsail Key Pair
 resource "aws_lightsail_key_pair" "key-pair" {
   name = "${var.app}-key-pair"
@@ -26,6 +31,11 @@ resource "aws_lightsail_instance" "instance" {
         rm -rf aws
         rm awscliv2.zip
 
+        # Configure AWS CLI
+        aws configure set aws_access_key_id ${aws_lightsail_bucket_access_key.offset-well-identification-lightsail-bucket-access-key.access_key_id} --profile lightsail
+        aws configure set aws_secret_access_key ${aws_lightsail_bucket_access_key.offset-well-identification-lightsail-bucket-access-key.secret_access_key} --profile lightsail
+        aws configure set region "us-east-1" --profile lightsail
+
         # Set up the environment variables
         export GH_PAT="${var.ghpat}"
         export APP_SECRET="${var.appsecret}"
@@ -38,6 +48,7 @@ resource "aws_lightsail_instance" "instance" {
         export S3_FOLDER_NAME="geojson"
         export GEOJSON_PATH=$AFE_PATH/$S3_FOLDER_NAME
         export PROJECTS_PATH=$AFE_PATH/projects
+        export S3_BUCKET_NAME="${var.s3_bucket}"
 
         # Create project directory
         mkdir -p $AFE_PATH
@@ -52,7 +63,9 @@ resource "aws_lightsail_instance" "instance" {
         git checkout main
 
         cp -R /tmp/afe/app/* $APP_PATH
-        cp -R /tmp/afe/plss/* $GEOJSON_PATH
+  
+        # Download geojson files from S3
+        # aws s3 sync s3://$S3_BUCKET_NAME/$S3_FOLDER_NAME $GEOJSON_PATH
 
         # Adjust permissions
         chown -R ubuntu:ubuntu $AFE_PATH
@@ -64,7 +77,7 @@ resource "aws_lightsail_instance" "instance" {
 
         sh -c "cat > $APP_PATH/.env" <<EOG
         PYTHONPATH="$PYTHONPATH:models:helpers:services:database"
-        VERSION="1.7.5.1"
+        VERSION="1.7.5.2"
         ENV="$ENV"
         APP="$APP"
         APP_ROOT="$APP_ROOT"

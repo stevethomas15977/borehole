@@ -1,15 +1,23 @@
+from helpers import (new_mexico_plss_overlay, 
+                     texas_plss_block_section_overlay,
+                     adjust_coordinate)
 from services import (AnalysisService, 
                       TargetWellInformationService, 
                       WellService,
                       XYZDistanceService,
-                      OverlapService)
+                      TexasLandSurveySystemService,
+                      NewMexicoLandSurveySystemService,
+                      StratigraphicService,
+                      SurveyService)
 from xlsxwriter import Workbook, worksheet
 from models import (Analysis,
                     TargetWellInformation)
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
-import math, os
+import math, os, io
 from context import Context
+from folium import Map, PolyLine, Element, Marker, DivIcon
+from PIL import Image
 
 def is_within_range(start: float, end: float, test: float) -> bool:
     lower_bound = min(start, end)
@@ -19,7 +27,7 @@ def is_within_range(start: float, end: float, test: float) -> bool:
 def wells_to_plot(analysis_service: AnalysisService,
                   xyz_distance_service: XYZDistanceService,
                   shallowest: int,
-                  deepest: int) -> list:
+                  deepest: int) -> tuple[list[Analysis], list[Analysis]]:
     try:
         target_wells = []
         other_wells = []
@@ -129,7 +137,8 @@ def create_well_data_worksheet(workbook: Workbook,
     except Exception as e:
         raise e
     
-def create_plot_data_worksheet(workbook: Workbook, 
+def create_plot_data_worksheet(context: Context,
+                               workbook: Workbook, 
                                worksheet: worksheet,
                                target_wells: list[Analysis], 
                                other_wells: list[Analysis]):
@@ -202,10 +211,13 @@ def create_plot_data_worksheet(workbook: Workbook,
     }
 
     # Plot other wells
+    stratigrahic_service = StratigraphicService(context.db_path)
+
     refs = []
     lzs = []
     first_row, row = last_row + 1, last_row
     for well in other_wells:
+        stratigrahipc = stratigrahic_service.get_by_union_code(well.interval)
         worksheet.write(row, 0, row, data_format)
         refs.append(row)
         ref_index[well.name] = row
@@ -215,6 +227,7 @@ def create_plot_data_worksheet(workbook: Workbook,
         worksheet.write(row, 3, well.gun_barrel_x, data_format)
         worksheet.write(row, 4, well.subsurface_depth, data_format)
         worksheet.write(row, 5, "TBD", data_format) 
+
         row = row + 1
     last_row = row
     other_well_series_1 = {
@@ -367,7 +380,8 @@ def create_line_series_data_worksheet(context: Context,
     except Exception as e:
         raise e
     
-def create_plot(workbook: Workbook, 
+def create_plot(context: Context,
+                workbook: Workbook, 
                 worksheet: worksheet,
                 title: str, 
                 section_line_label: str, 
@@ -611,3 +625,147 @@ def months_between_dates(start_date:str, end_date:str) -> int:
 
     # Return the total number of months (years * 12 + months)
     return delta.years * 12 + delta.months
+
+def create_surface_map(context: Context,
+                       worksheet: worksheet,
+                       target_well_information: TargetWellInformation,
+                       ref_index: dict,
+                       target_wells: list[Analysis],
+                       other_wells: list[Analysis]):
+    try:
+        if target_well_information.state == "TX":
+            plss_service = TexasLandSurveySystemService(context._texas_land_survey_system_database_path)
+            plss = plss_service.get_by_county_abstract(county=target_well_information.county, 
+                                                       abstract=target_well_information.tx_abstract_southwest_corner)
+            map = Map(location=[plss.southwest_latitude, 
+                                plss.southwest_longitude], 
+                                zoom_start=13, 
+                                zoom_control=True,
+                                scrollWheelZoom=True,
+                                tiles='OpenStreetMap')
+            fips_codes = []
+            fips_codes.append(plss.fips_code)
+            texas_plss_block_section_overlay(context=context, fip_codes=fips_codes, map=map)
+        elif target_well_information.state == "NM":
+            plss_service = NewMexicoLandSurveySystemService(context._new_mexico_land_survey_system_database_path)
+            township = int(target_well_information.nw_township_southwest_corner[:-1])
+            township_direction = target_well_information.nw_township_southwest_corner[-1]
+            range = int(target_well_information.nm_range_southwest_corner[:-1])
+            range_direction = target_well_information.nm_range_southwest_corner[-1]
+            section = int(target_well_information.nm_tx_section_southwest_corner)
+            plss = plss_service.get_by_township_range_section(township=township, 
+                                                              township_direction=township_direction, 
+                                                              range=range, 
+                                                              range_direction=range_direction, 
+                                                              section=section)
+            map = Map(location=[plss.southwest_latitude, 
+                                plss.southwest_longitude], 
+                                zoom_start=13, 
+                                zoom_control=True,
+                                scrollWheelZoom=True,                                
+                                tiles='OpenStreetMap')
+            file_prefixes = []
+            file_prefixes.append(target_well_information.nw_township_southwest_corner)
+            file_prefixes.append(f"{int(township)-3}{township_direction}")
+            file_prefixes.append(f"{int(township)-2}{township_direction}")
+            file_prefixes.append(f"{int(township)-1}{township_direction}")
+            file_prefixes.append(f"{int(township)+1}{township_direction}")
+            file_prefixes.append(f"{int(township)+2}{township_direction}")
+            file_prefixes.append(f"{int(township)+3}{township_direction}")
+            new_mexico_plss_overlay(context=context, file_prefixes=file_prefixes, map=map)
+
+        # Draw gun barrel line
+        start = adjust_coordinate(plss.southeast_latitude, plss.southeast_longitude, 2640, "W")
+        end = adjust_coordinate(plss.southeast_latitude, plss.southeast_longitude, 7920, "E")
+        PolyLine([start, end], color='black', weight=3.0, tooltip=f"Gun barrel line").add_to(map)
+
+        label_postion = "sl"
+        # Plot target wells
+        for target_well in target_wells:
+            start = (float(target_well.lateral_start_latitude), float(target_well.lateral_start_longitude))
+            end = (float(target_well.lateral_end_latitude), float(target_well.lateral_end_longitude))
+            PolyLine([start, end], color="orange", weight=2.0, tooltip=f"{target_well.name}").add_to(map)
+            if "sl" == label_postion:
+                location = start
+                label_postion = "bh"
+            else:
+                location = end
+                label_postion = "sl"
+            Marker(
+                location=location,
+                icon=DivIcon(icon_size=(150, 36), 
+                             icon_anchor=(0, 0),
+                             html=f'<div style="font-size: 12px; color: black;"><b>{ref_index[target_well.name]}-{target_well.interval}</b></div>',
+                ),).add_to(map)
+
+        # Plot other wells
+        stratigraphic_service = StratigraphicService(context.db_path)
+        survey_service = SurveyService(context.db_path)
+        for other_well in other_wells:
+            stratigraphic = stratigraphic_service.get_by_union_code(other_well.interval)
+            color = stratigraphic.color if stratigraphic is not None else "green"
+            surveys = survey_service.get_by_api(api=other_well.api)
+            if len(surveys) == 0:
+                start = (float(other_well.lateral_start_latitude), float(other_well.lateral_start_longitude))
+                end = (float(other_well.lateral_end_latitude), float(other_well.lateral_end_longitude))
+                PolyLine([start, end], color=color, weight=2.0, tooltip=f"{other_well.name}").add_to(map)
+            else:
+                for index, survey in enumerate(surveys):
+                    if index == 0:
+                        start = (survey.latitude, survey.longitude)
+                        end = (survey.latitude, survey.longitude)
+                        PolyLine([start, end], color=color, weight=2.0, tooltip=f"{other_well.name}").add_to(map)
+                    else:
+                        start = (surveys[index - 1].latitude, surveys[index - 1].longitude)
+                        end = (survey.latitude, survey.longitude)
+                        PolyLine([start, end], color=color, weight=2.0, tooltip=f"{other_well.name}").add_to(map)
+
+            start = (float(other_well.lateral_start_latitude), float(other_well.lateral_start_longitude))
+            end = (float(other_well.lateral_end_latitude), float(other_well.lateral_end_longitude))
+
+            if "sl" == label_postion:
+                location = start
+                label_postion = "bh"
+            else:
+                location = end
+                label_postion = "sl"
+            Marker(
+                location=location,
+                icon=DivIcon(icon_size=(150, 36), 
+                             icon_anchor=(0, 0),
+                             html=f'<div style="font-size: 10px; color: black;"><b>{ref_index[other_well.name]}-{other_well.interval}</b></div>',
+                ),).add_to(map)
+            
+        # Draw legend
+        legend_html = ""
+        legend_html += f"""<div style="position: fixed; top: 80px; left: 10px; width: 200px; border: 2px solid white; z-index: 9999; max-height: 100%; background-color: white; opacity: 0.9; padding: 5px;">"""
+        legend_html += f""" <div style="text-align: center; font-size: 14px;"><b>{context.project} - {context.version}</b></div>"""
+        legend_html += f""" <div style="margin-right: 10px;">"""
+        lzs = set()
+        for other_well in other_wells:
+            lzs.add(other_well.interval)
+        for lz in lzs:
+            stratigraphic = stratigraphic_service.get_by_union_code(lz)
+            color = stratigraphic.color if stratigraphic is not None else "green"
+            legend_html += f"""  <div style="margin-right: 5px;">"""
+            legend_html += f"""   <span style='font-size:12px'><b>{lz}</b></span>"""
+            legend_html += f"""   <span><div style="display: inline-block; width: 12px; height: 12px; background-color: {color}; border-radius: 50%; margin-right: 8px;"></span></div>"""
+            legend_html += f"""   <br>"""
+            legend_html += f"""  </div>"""      
+        legend_html += f""" </div>"""
+        legend_html += f"""</div>"""
+        map.get_root().html.add_child(Element(legend_html))
+
+        # Save the map
+        html_file = os.path.join(context.logs_path, f"{context.project}-gun-barrel-surface-map-{context.version}.html")
+        image_file = os.path.join(context.logs_path, f"{context.project}-gun-barrel-surface-map-{context.version}.png")
+        map.save(html_file)
+        img_data = map._to_png()
+        img = Image.open(io.BytesIO(img_data))
+        img.save(image_file)
+
+        # Insert the image into the worksheet
+        worksheet.insert_image('B2', image_file) 
+
+    except Exception as e:
+        raise e
