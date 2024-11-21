@@ -6,7 +6,7 @@
     <title>{{ app }} - {{ version }} - {{ server }}</title>
 </head>
 <body>
-    <h2>Welcome to {{ app }} on {{ env }}</h2>
+    <h2>Welcome to AFE Aanlysis Tools on {{ env }}</h2>
     <p>Version: {{ version }} running on AWS Lightsail</p>
 
     {% with messages = get_flashed_messages() %}
@@ -41,25 +41,18 @@
     </a>
     <br><br>
     <b>Rrelease notes:</b>
-    <p>Offset Well Identification spreadsheet</p>
+    <p>Offset Well Identification Tool</p>
     <ul>
         <li>Add LateralLength_FT and Effective_Perf_Interval</li>
     </ul>
-    <p>Gun Barrel Plot</p>
+    <p>Gun Barrel Plot Tool</p>
     <ul>
-        <li>Create native Excel Plot</li>
-        <li>Create new tab Well Information Table</li>
-        <li>Create new tab Plot Data</li>
-        <li>Combine Well Summary into revised Calculated Data Tab (see attached) and delete Well Summary tab</li>
-        <li>Scale: 1.5 sections to the east of the reference (7920) and ½ section to the west (2640)</li>
-        <li>Take off labels on the chart except the well ref number and landing zone identifier</li>
-        <li>Add additional information to the table on the chart (just expand the plot to the right to accommodate)</li>
+        <li>Create a native Excel version</li>
+        <li>Add 3D Plot</li>
     </ul>
     <p>Cross Plot</p>
     <ul>
-        <li>Add grid lines</li>
-        <li>Change colors so they are different (assign permanent / same colors to landings zones per Michaels table)</li>
-        <li>Add ref numbers on the spreadsheet well list and show number on the plot (in the dot).  Note: Put wells in alphabetical order by well name before numbering.</li>
+        <li>Change landing zone colors</li>
     </ul>
 </body>
 </html>
