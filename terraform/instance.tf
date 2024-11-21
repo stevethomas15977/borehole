@@ -20,6 +20,12 @@ resource "aws_lightsail_instance" "instance" {
         apt-get update -y
         sudo apt-get install -y unzip jq python3-pip python3-dev python3-venv pipx nginx apache2-utils -y
 
+        # Install Chrome
+        wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+        sudo dpkg -i google-chrome-stable_current_amd64.deb
+        sudo apt install --fix-broken -y
+        sudo rm google-chrome-stable_current_amd64.deb
+
         # Install pipenv
         pipx ensurepath
         pipx install pipenv
@@ -77,7 +83,7 @@ resource "aws_lightsail_instance" "instance" {
 
         sh -c "cat > $APP_PATH/.env" <<EOG
         PYTHONPATH="$PYTHONPATH:models:helpers:services:database"
-        VERSION="1.7.5.3"
+        VERSION="1.7.5.4"
         ENV="$ENV"
         APP="$APP"
         APP_ROOT="$APP_ROOT"

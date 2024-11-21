@@ -18,6 +18,7 @@ import math, os, io
 from context import Context
 from folium import Map, PolyLine, Element, Marker, DivIcon
 from PIL import Image
+from html2image import Html2Image
 
 def is_within_range(start: float, end: float, test: float) -> bool:
     lower_bound = min(start, end)
@@ -639,7 +640,7 @@ def create_surface_map(context: Context,
                                                        abstract=target_well_information.tx_abstract_southwest_corner)
             map = Map(location=[plss.southwest_latitude, 
                                 plss.southwest_longitude], 
-                                zoom_start=13, 
+                                zoom_start=14, 
                                 zoom_control=True,
                                 scrollWheelZoom=True,
                                 tiles='OpenStreetMap')
@@ -660,7 +661,7 @@ def create_surface_map(context: Context,
                                                               section=section)
             map = Map(location=[plss.southwest_latitude, 
                                 plss.southwest_longitude], 
-                                zoom_start=13, 
+                                zoom_start=14, 
                                 zoom_control=True,
                                 scrollWheelZoom=True,                                
                                 tiles='OpenStreetMap')
@@ -675,8 +676,8 @@ def create_surface_map(context: Context,
             new_mexico_plss_overlay(context=context, file_prefixes=file_prefixes, map=map)
 
         # Draw gun barrel line
-        start = adjust_coordinate(plss.southeast_latitude, plss.southeast_longitude, 2640, "W")
-        end = adjust_coordinate(plss.southeast_latitude, plss.southeast_longitude, 7920, "E")
+        start = adjust_coordinate(plss.southwest_latitude, plss.southwest_longitude, 2640, "W")
+        end = adjust_coordinate(plss.southwest_latitude, plss.southwest_longitude, 7920, "E")
         PolyLine([start, end], color='black', weight=3.0, tooltip=f"Gun barrel line").add_to(map)
 
         label_postion = "sl"
@@ -733,7 +734,7 @@ def create_surface_map(context: Context,
                 location=location,
                 icon=DivIcon(icon_size=(150, 36), 
                              icon_anchor=(0, 0),
-                             html=f'<div style="font-size: 10px; color: black;"><b>{ref_index[other_well.name]}-{other_well.interval}</b></div>',
+                             html=f'<div style="font-size: 10px; color: black;"><b>{ref_index[other_well.name]}</b></div>',
                 ),).add_to(map)
             
         # Draw legend
@@ -741,6 +742,19 @@ def create_surface_map(context: Context,
         legend_html += f"""<div style="position: fixed; top: 80px; left: 10px; width: 200px; border: 2px solid white; z-index: 9999; max-height: 100%; background-color: white; opacity: 0.9; padding: 5px;">"""
         legend_html += f""" <div style="text-align: center; font-size: 14px;"><b>{context.project} - {context.version}</b></div>"""
         legend_html += f""" <div style="margin-right: 10px;">"""
+
+        legend_html += f"""  <div style="margin-right: 5px;">"""
+        legend_html += f"""   <span style='font-size:12px'><b>Section LIne</b></span>"""
+        legend_html += f"""   <span><div style="display: inline-block; width: 12px; height: 12px; background-color: black; border-radius: 50%; margin-right: 8px;"></span></div>"""
+        legend_html += f"""   <br>"""
+        legend_html += f"""  </div>"""     
+                
+        legend_html += f"""  <div style="margin-right: 5px;">"""
+        legend_html += f"""   <span style='font-size:12px'><b>Target Well</b></span>"""
+        legend_html += f"""   <span><div style="display: inline-block; width: 12px; height: 12px; background-color: orange; border-radius: 50%; margin-right: 8px;"></span></div>"""
+        legend_html += f"""   <br>"""
+        legend_html += f"""  </div>"""  
+
         lzs = set()
         for other_well in other_wells:
             lzs.add(other_well.interval)
@@ -760,9 +774,12 @@ def create_surface_map(context: Context,
         html_file = os.path.join(context.logs_path, f"{context.project}-gun-barrel-surface-map-{context.version}.html")
         image_file = os.path.join(context.logs_path, f"{context.project}-gun-barrel-surface-map-{context.version}.png")
         map.save(html_file)
-        # img_data = map._to_png()
-        # img = Image.open(io.BytesIO(img_data))
-        # img.save(image_file)
+
+        hti = Html2Image(output_path = context.logs_path,
+                         custom_flags=['--headless'])
+        hti.screenshot(html_file=html_file, 
+                       save_as=f"{context.project}-gun-barrel-surface-map-{context.version}.png", 
+                       size=(1500, 1500))
 
         # Insert the image into the worksheet
         worksheet.insert_image('B2', image_file) 

@@ -4,7 +4,6 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-flask = "==3.0.3"
 flask-httpauth = "==4.8.0"
 geopandas = "==1.0.1"
 matplotlib = "*"
@@ -41,6 +40,9 @@ xlsxwriter = "*"
 webdriver-manager = "*"
 selenium = "*"
 folium = "*"
+flask = "*"
+autoindex = "*"
+html2image = "==2.0.5"
 
 [dev-packages]
 

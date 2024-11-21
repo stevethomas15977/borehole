@@ -18,7 +18,7 @@
             "program": "${workspaceFolder}/app/workflow_manager.py",
             "console": "integratedTerminal",
             "cwd": "${workspaceFolder}/app",
-            "envFile": "${workspaceFolder}/.env"
+            "envFile": "${workspaceFolder}/app/.env"
         },
         {
             "name": "Debug UI",
@@ -27,7 +27,7 @@
             "program": "${workspaceFolder}/app/ui.py",
             "console": "integratedTerminal",
             "cwd": "${workspaceFolder}/app",
-            "envFile": "${workspaceFolder}/.env"
+            "envFile": "${workspaceFolder}/app/.env"
         }
     ]
 }
