@@ -77,7 +77,7 @@ class WorkflowManager:
         self._factory = TaskFactory(self._context)
 
 if __name__ == "__main__":
-    context = Context().dragonfly_5_mile()
+    context = Context().redhills()
     workflow_manager = WorkflowManager(context)
     workflow_manager.project_initiation_workflow()
     workflow_manager.base_workflow()

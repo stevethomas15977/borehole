@@ -478,7 +478,7 @@ class CreateGunBarrelPlot(Task):
                                 target_well_analysis.first_production_date,
                                 offset_well_analysis.first_production_date,
                                 gun_barrel.months_from_first_production,
-                                target_well.perf_interval_ft,
+                                target_well.surveys_preforated_interval_ft,
                                 well.perf_interval,
                                 "TBD",
                                 gun_barrel.overlap_feet,

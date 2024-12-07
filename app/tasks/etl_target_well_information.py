@@ -79,7 +79,7 @@ class ETLTargetWellInformation(Task):
                     else:
                         raise ValueError(f"NAD Zone {target_well.nad_zone} is not supported")
                     
-                    if (target_well.nw_township_southwest_corner is None or \
+                    if (target_well.nw_township_southwest_corner is None or
                         target_well.nm_range_southwest_corner is None or 
                         target_well.nm_tx_section_southwest_corner is None):
                         message = f"NM Township, Range, and Section must be provided"

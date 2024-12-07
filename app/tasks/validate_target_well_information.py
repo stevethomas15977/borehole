@@ -147,6 +147,8 @@ class ValidateTargetWellInformation(Task):
                     raise Exception(f"Error - State is missing")
                 if isna(row.county):
                     raise Exception(f"Error - County is missing")
+                if row.state not in ['TX', 'NM']:
+                    raise Exception(f"Error - State is not TX or NM")
                 if row.state == 'TX':
                     if isna(row.tx_abstract_southwest_corner):
                         raise Exception(f"Error - TX Abstract Southwest Corner is missing")

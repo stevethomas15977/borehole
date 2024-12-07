@@ -113,7 +113,7 @@ def dtype ():
             "tx_block_southwest_corner": "TEXT",
             "nw_township_southwest_corner": "TEXT",
             "nm_range_southwest_corner": "TEXT",
-            "nm_tx_section_southwest_corner": "TEXT",
+            "nm_tx_section_southwest_corner": "INTEGER",
             "nad_system": "TEXT",
             "nad_zone": "TEXT",
             "x_surface_location": "REAL",

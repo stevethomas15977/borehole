@@ -543,7 +543,7 @@ def create_calulated_data_worksheet(workbook, worksheet,
             worksheet.write(row, 4, target_well_analysis.first_production_date, data_format)
             worksheet.write(row, 5, offset_well_analysis.first_production_date, data_format)
             worksheet.write(row, 6, "TBD", data_format)
-            worksheet.write(row, 7, target_well_information.perf_interval_ft, data_format)
+            worksheet.write(row, 7, target_well_information.surveys_preforated_interval_ft, data_format)
             perf_interval = offset_well.lateral_length if offset_well.perf_interval is None else offset_well.perf_interval
             worksheet.write(row, 8, perf_interval, data_format)
             worksheet.write(row, 9, "TDB", data_format)

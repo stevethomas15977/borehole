@@ -415,3 +415,21 @@ class Context():
         context.well_file = os.path.join(context.well_data_path, "popin-cork-10-mile-well-data.xlsx")
         context.survey_file = os.path.join(context.survey_data_path, "popin-cork-10-survey-data.xlsx")
         return context
+    
+    @staticmethod
+    def redhills():
+        context = Context()
+        context.project = "redhills"
+        context.project_path = os.path.join(context.projects_path, context.project)
+        
+        context.target_well_information_path = os.path.join(context.project_path, 'target_well_information')
+        context.well_data_path = os.path.join(context.project_path, 'well_data')
+        context.survey_data_path = os.path.join(context.project_path, 'survey_data')
+        context.logs_path = os.path.join(context.project_path, 'logs')
+
+        context.db_path = os.path.join(context.logs_path, f"{context.project}-{context.version}.db")
+
+        context.target_well_information_file = os.path.join(context.target_well_information_path, "redhills-target-well-information.xlsx")
+        context.well_file = os.path.join(context.well_data_path, "redhills-well-data.xlsx")
+        context.survey_file = os.path.join(context.survey_data_path, "redhills-survey-data.xlsx")
+        return context
