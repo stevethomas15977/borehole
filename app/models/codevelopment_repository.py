@@ -3,7 +3,6 @@ from sqlite3 import Connection, Cursor, DatabaseError, IntegrityError
 from database import AFEDB
 from models import Codevelopment
 
-
 class CodevelopmentRepository:
     def __init__(self, db_path):
         self.db_path = db_path

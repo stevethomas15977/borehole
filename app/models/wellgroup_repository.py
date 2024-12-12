@@ -35,6 +35,29 @@ class WellGroupRepository:
         finally:
             cursor.close()
 
+    def update(self, wellgroup: WellGroup):
+        try:
+            cursor = Cursor(self.connection)
+            if not wellgroup.name and not wellgroup.color:
+                raise ValueError("wellgroup name and color cannot be null")
+            try:
+                cursor.execute(
+                    AFEDB.SQL.UPDATE_WELL_GROUP.value,
+                    (
+                        wellgroup.color,
+                        wellgroup.avg_cumoil_per_ft,
+                        wellgroup.name
+                    ),
+                )
+            except IntegrityError as e:
+                raise ValueError(f"Unable to update WellGroup {wellgroup.name} in database: {e}  \n {print_exc()}") 
+            self.connection.commit()
+        except IntegrityError as e:
+            self.connection.rollback() 
+            raise ValueError(f"Unable to update WellGroup {wellgroup.name} in database: {e} \n {print_exc()}")
+        finally:
+            cursor.close()
+
     def get_all(self) -> list[WellGroup]:
         try:
             cursor = Cursor(self.connection)

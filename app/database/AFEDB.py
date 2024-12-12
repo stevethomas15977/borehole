@@ -264,7 +264,9 @@ class AFEDB:
                 township TEXT,
                 "range" TEXT,
                 section TEXT,
-                cumlative_oil INTEGER
+                cumlative_oil INTEGER,
+                last_producing_month TEXT,
+                cumoil_bblperft INTEGER
             ); """
 
         DROP_WELL_TABLE = """DROP TABLE IF EXISTS well"""
@@ -296,8 +298,10 @@ class AFEDB:
             township,
             "range",
             section,
-            cumlative_oil)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) 
+            cumlative_oil,
+            last_producing_month,
+            cumoil_bblperft)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) 
             """
 
         SELECT_WELLS = """SELECT * FROM well ORDER BY name DESC"""
@@ -399,7 +403,9 @@ class AFEDB:
                 gun_barrel_y INTEGER,
                 gun_barrel_z INTEGER,
                 target_well_spacing_gun_barrel_plot_flag TEXT,
-                gun_barrel_index INTEGER
+                gun_barrel_index INTEGER,
+                cumoil_bblperft INTEGER,
+                pct_of_group_cumoil_bblperft REAL
             ); """
 
         DROP_ANALYSIS_TABLE = """DROP TABLE IF EXISTS analysis"""
@@ -457,7 +463,9 @@ class AFEDB:
             gun_barrel_y,
             gun_barrel_z,
             target_well_spacing_gun_barrel_plot_flag,
-            gun_barrel_index)
+            gun_barrel_index,
+            cumoil_bblperft,
+            pct_of_group_cumoil_bblperft)
             VALUES (?, ?, ?, ?, ?, 
                     ?, ?, ?, ?, ?, 
                     ?, ?, ?, ?, ?, 
@@ -468,7 +476,7 @@ class AFEDB:
                     ?, ?, ?, ?, ?,
                     ?, ?, ?, ?, ?,
                     ?, ?, ?, ?, ?,
-                    ?, ?)
+                    ?, ?, ?, ?)
             """
         UPDATE_ANALYSIS = """
             UPDATE analysis
@@ -522,7 +530,9 @@ class AFEDB:
             gun_barrel_y = ?,
             gun_barrel_z = ?,
             target_well_spacing_gun_barrel_plot_flag = ?,
-            gun_barrel_index = ?
+            gun_barrel_index = ?,
+            cumoil_bblperft = ?,
+            pct_of_group_cumoil_bblperft = ?
             WHERE api = ?
         """
         UPDATE_ANALYSIS_SET_TARGET_WELL_SPACING_GUN_BARREL_PLOT_FLAG_NULL = """ UPDATE analysis SET target_well_spacing_gun_barrel_plot_flag = NULL"""
@@ -547,7 +557,8 @@ class AFEDB:
         
         SELECT_ANALYSIS_DEEPEST = """SELECT MAX(ABS(subsurface_depth)) FROM analysis"""
 
-
+        SELECT_ANALYSIS_AVG_GROUP_CUMOIL_PER_FT = """SELECT CAST(AVG(cumoil_bblperft) AS INTEGER) avg_group_cumoil FROM analysis WHERE group_id = ? """
+        
         ####### Adjacent Table ########
         CREATE_ADJACENT_TABLE = """
             CREATE TABLE IF NOT EXISTS adjacent
@@ -666,7 +677,8 @@ class AFEDB:
             CREATE TABLE IF NOT EXISTS wellgroup
             (
                 name TEXT PRIMARY KEY,
-                color TEXT NOT NULL   
+                color TEXT NOT NULL,
+                avg_cumoil_per_ft REAL
             ); """
         
         DROP_WELL_GROUP_TABLE = """DROP TABLE IF EXISTS wellgroup"""
@@ -677,6 +689,14 @@ class AFEDB:
                 color)
             VALUES (?, ?)    
             """
+        
+        UPDATE_WELL_GROUP = """
+            UPDATE wellgroup
+            SET color = ?,
+            avg_cumoil_per_ft = ?
+            WHERE name = ?            
+        """
+        
         SELECT_ALL_WELL_GROUPS = """SELECT * FROM wellgroup ORDER BY name ASC"""
 
         SELECT_WELL_GROUP_BY_NAME = """SELECT * FROM wellgroup WHERE name = ?"""

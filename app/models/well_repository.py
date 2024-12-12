@@ -47,7 +47,9 @@ class WellRepository:
                             well.township,
                             well.range,
                             well.section,
-                            well.cumlative_oil
+                            well.cumlative_oil,
+                            well.last_producing_month,
+                            well.cumoil_bblperft
                         ),
                     )
                 except IntegrityError as e:

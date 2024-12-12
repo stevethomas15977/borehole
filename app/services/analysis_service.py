@@ -49,3 +49,6 @@ class AnalysisService:
     
     def get_deepest(self) -> int:
         return self.repository.get_deepest()
+    
+    def get_group_avg_cumoil_bbl_per_ft(self, group_id: str) -> int:
+        return self.repository.get_group_avg_cumoil_bbl_per_ft(group_id)

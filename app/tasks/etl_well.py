@@ -31,6 +31,7 @@ class ETLWell(Task):
                         if well.interval is not None:
                             analysis.interval = stratigraphic_service.get_by_prism_code(well.interval).union_code
                         analysis.first_production_date = str(well.first_production_date)
+                        analysis.cumoil_bblperft = well.cumoil_bblperft
                         analysis_list.append(analysis)
                     else:
                         logger.error(f"Unable to create survey data for well: {well.name}")
@@ -43,6 +44,7 @@ class ETLWell(Task):
                         if well.interval is not None:
                             analysis.interval = stratigraphic_service.get_by_prism_code(well.interval).union_code
                         analysis.first_production_date = str(well.first_production_date)
+                        analysis.cumoil_bblperft = well.cumoil_bblperft
                         analysis_list.append(analysis)
                     else:
                         logger.warning(f"Survey may be incomplete for well/api: {well.name}/{well.api}, will attempt to create survey from well data")
@@ -53,6 +55,7 @@ class ETLWell(Task):
                             if well.interval is not None:
                                 analysis.interval = stratigraphic_service.get_by_prism_code(well.interval).union_code
                             analysis.first_production_date = str(well.first_production_date)
+                            analysis.cumoil_bblperft = well.cumoil_bblperft
                             analysis_list.append(analysis) 
                         else:
                             logger.error(f"Unable to create survey data for well: {well.name}")

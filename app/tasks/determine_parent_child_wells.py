@@ -4,7 +4,7 @@ from helpers import task_logger
 from traceback import format_exc
 
 from helpers import is_at_least_6_months_earlier, months_between_dates
-from services import (AnalysisService, LatitudeLongitudeDistanceService, AdjacentService)
+from services import (AnalysisService, LatitudeLongitudeDistanceService, AdjacentService, WellGroupService)
 from models import ParentChild
 
 class DetermineParentChildWells(Task):
@@ -16,6 +16,7 @@ class DetermineParentChildWells(Task):
             analysis_service = AnalysisService(db_path=self.context.db_path)
             distance_service = LatitudeLongitudeDistanceService(db_path=self.context.db_path)
             adjacent_service = AdjacentService(db_path=self.context.db_path)
+            well_group_service = WellGroupService(db_path=self.context.db_path)
 
             analyses = analysis_service.get()
 
@@ -53,6 +54,12 @@ class DetermineParentChildWells(Task):
                                     parentchild.adjacent = "No"
                                     parentchild.sibling_api = analysis.api
                                     parentchild.sibling_name = analysis.name
+
+                                if analysis.group_id is not None:
+                                    well_group = well_group_service.get_by_name(analysis.group_id)
+                                    if well_group is not None and well_group.avg_cumoil_per_ft > 0:
+                                        analysis.pct_of_group_cumoil_bblperft = round((analysis.cumoil_bblperft / well_group.avg_cumoil_per_ft) * 100, 2)
+
                                 parentchildren.append(parentchild)
                                 analysis_service.update(analysis)
                 if len(parents) > 0:

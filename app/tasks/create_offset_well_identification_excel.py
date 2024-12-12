@@ -6,10 +6,11 @@ import time
 from openpyxl.utils import get_column_letter
 from openpyxl.styles import Alignment, PatternFill
 import openpyxl
+from openpyxl.worksheet.worksheet import Worksheet
 import pandas as pd
 import os
 from helpers import auto_adjust_column_widths
-from services import AnalysisService, WellService
+from services import AnalysisService, WellService, WellGroupService
 
 class CreateOffsetWellIdentificationExcel(Task):
     
@@ -19,7 +20,7 @@ class CreateOffsetWellIdentificationExcel(Task):
         try:
             analysis_service = AnalysisService(db_path=self.context.db_path)
             well_service = WellService(db_path=self.context.db_path)
-
+            well_group_service = WellGroupService(db_path=self.context.db_path) 
             analyses = list(analysis_service.get_all_excluding_target_wells())
 
             df = pd.DataFrame(columns=['API_UWI', 
@@ -28,6 +29,9 @@ class CreateOffsetWellIdentificationExcel(Task):
                                         'Child',
                                         'In/Out',
                                         'Remarks',
+                                        'Cum Oil',
+                                        'Cum Oil bbl per ft',
+                                        'Pct of Group Cum Oil bbl per ft',
                                         'ENVOperator', 
                                         'ENVInterval', 
                                         'FirstProdDate', 
@@ -72,6 +76,9 @@ class CreateOffsetWellIdentificationExcel(Task):
                     'Child': analysis.child,
                     'In/Out': None,
                     'Remarks': "",
+                    'Cum Oil': well._cumlative_oil,
+                    'Cum Oil bbl per ft': analysis.cumoil_bblperft,
+                    'Pct of Group Cum Oil bbl per ft': analysis.pct_of_group_cumoil_bblperft,
                     'ENVOperator': well.operator,
                     'ENVInterval': well.interval,
                     'FirstProdDate': analysis.first_production_date,
@@ -126,7 +133,6 @@ class CreateOffsetWellIdentificationExcel(Task):
             freeze_col_letter = get_column_letter(well_name_col_index + 1)
             worksheet.freeze_panes = f'{freeze_col_letter}2'
             
-
             # Adjust the column widths
             auto_adjust_column_widths(worksheet)
 
@@ -149,6 +155,15 @@ class CreateOffsetWellIdentificationExcel(Task):
             for row in worksheet.iter_rows():
                 for cell in row:
                     cell.alignment = Alignment(horizontal='center', vertical='center')
+
+            # Add Work Groups worksheet
+            work_group_worksheet = workbook.create_sheet(title="Work Groups", index=1)
+            work_group_worksheet['A1'] = "Work Group"
+            work_group_worksheet['B1'] = "Avg Cum Oil bbl per ft"
+            work_groups = well_group_service.get_all()
+            for i, work_group in enumerate(work_groups, start=2):
+                work_group_worksheet[f'A{i}'] = work_group.name
+                work_group_worksheet[f'B{i}'] = work_group.avg_cumoil_per_ft
 
             attempt_limit = 5
             attempt = 0

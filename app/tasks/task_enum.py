@@ -31,6 +31,7 @@ class TASKS(Enum):
     CREATE_OFFSET_WELL_IDENTIFICATION_EXCEL = 'create_offset_well_identification_excel'
     CREATE_SURFACE_MAP = 'create_surface_map'
     CREATE_CODEVELOPMENT_GROUP_SURFACE_MAP = 'create_codevelopment_group_surface_map'
+    DETERMINE_WELL_GROUPING_AVG_CUM_OIL_BBL_PER_FT = 'determine_well_grouping_avg_cum_oil_bbl_per_ft'
 
     # Well Spacing Gun Barrel Plot Workflow Group Tasks
     GUN_BARREL_PLOT_WORKFLOW_DATABASE_MANAGEMENT = 'gun_barrel_plot_workflow_database_management'

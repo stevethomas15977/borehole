@@ -74,7 +74,9 @@ class AnalysisRepository:
                             analysis.gun_barrel_y,
                             analysis.gun_barrel_z,
                             analysis.target_well_spacing_gun_barrel_plot_flag,
-                            analysis.gun_barrel_index
+                            analysis.gun_barrel_index,
+                            analysis.cumoil_bblperft,
+                            analysis.pct_of_group_cumoil_bblperft
                         ),
                     )
                 except IntegrityError as e:
@@ -143,7 +145,9 @@ class AnalysisRepository:
                     analysis.gun_barrel_y,
                     analysis.gun_barrel_z,
                     analysis.target_well_spacing_gun_barrel_plot_flag,
-                    analysis.gun_barrel_index
+                    analysis.gun_barrel_index,
+                    analysis.cumoil_bblperft,
+                    analysis.pct_of_group_cumoil_bblperft
                 ),
             )
             self.connection.commit()
@@ -215,6 +219,8 @@ class AnalysisRepository:
                     analysis.gun_barrel_z,
                     analysis.target_well_spacing_gun_barrel_plot_flag,
                     analysis.gun_barrel_index,
+                    analysis.cumoil_bblperft,
+                    analysis.pct_of_group_cumoil_bblperft,
                     analysis.api
                 ),
             )
@@ -364,5 +370,17 @@ class AnalysisRepository:
                 return int(*row)
         except DatabaseError as e:
             raise ValueError(f"Unable to get analysis deepest well{e}")
+        finally:
+            cursor.close()
+
+    def get_group_avg_cumoil_bbl_per_ft(self, group_id: str) -> int:
+        try:
+            cursor = Cursor(self.connection)
+            cursor.execute(AFEDB.SQL.SELECT_ANALYSIS_AVG_GROUP_CUMOIL_PER_FT.value, (group_id,))
+            row = cursor.fetchone()
+            if row:
+                return int(*row)
+        except DatabaseError as e:
+            raise ValueError(f"Unable to get analysis group average cumoil bbl per ft{e}")
         finally:
             cursor.close()

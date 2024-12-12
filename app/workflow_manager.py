@@ -48,6 +48,7 @@ class WorkflowManager:
         workgroup.add_task(TASKS.DETERMINE_ADJACENT_WELLS.value)
         workgroup.add_task(TASKS.DETERMINE_CODEVELOPMENT_WELLS.value)
         workgroup.add_task(TASKS.DETERMINE_WELL_GROUPING.value)
+        workgroup.add_task(TASKS.DETERMINE_WELL_GROUPING_AVG_CUM_OIL_BBL_PER_FT.value)
         workgroup.add_task(TASKS.CALCULATE_WELL_AVERAGE_SPACING.value)
         workgroup.add_task(TASKS.CALCULATE_WELL_GROUP_AVERAGE_SPACING.value)
         workgroup.add_task(TASKS.DETERMINE_PARENT_CHILD_WELLS.value)

@@ -30,7 +30,8 @@ class Well:
         range:str=None,
         section:str=None,
         cumlative_oil:int=None,
-        last_producing_month=None
+        last_producing_month:str=None,
+        cumoil_bblperft:int=None
     ):
         self._api = api
         self._name = name
@@ -59,6 +60,7 @@ class Well:
         self._section = section
         self._cumlative_oil = cumlative_oil
         self._last_producing_month = last_producing_month
+        self.cumoil_bblperft = cumoil_bblperft
 
     # Getters
     @property
@@ -277,3 +279,19 @@ class Well:
     @last_producing_month.setter
     def last_producing_month(self, value):
         self._last_producing_month = value
+
+    @property
+    def cumlative_oil(self):
+        return self._cumlative_oil
+    
+    @cumlative_oil.setter
+    def cumlative_oil(self, value):
+        self._cumlative_oil = value
+    
+    @property
+    def cumoil_bblperft(self):
+        return self._cumoil_bblperft
+    
+    @cumoil_bblperft.setter
+    def cumoil_bblperft(self, value):
+        self._cumoil_bblperft = value

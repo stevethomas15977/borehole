@@ -51,7 +51,9 @@ class Analysis:
                  gun_barrel_y:int=None,
                  gun_barrel_z:int=None,
                  target_well_spacing_gun_barrel_plot_flag:bool=None,
-                 gun_barrel_index:int=None):
+                 gun_barrel_index:int=None,
+                 cumoil_bblperft:int=None,
+                 pct_of_group_cumoil_bblperft:float=None,):
         
         self._api = api
         self._name = name
@@ -105,6 +107,8 @@ class Analysis:
         self._gun_barrel_z = gun_barrel_z
         self.target_well_spacing_gun_barrel_plot_flag = target_well_spacing_gun_barrel_plot_flag
         self._gun_barrel_index = gun_barrel_index
+        self._cumoil_bblperft = cumoil_bblperft
+        self.pct_of_group_cumoil_bblperft = pct_of_group_cumoil_bblperft
 
     @property
     def api(self):
@@ -521,3 +525,19 @@ class Analysis:
     @gun_barrel_index.setter
     def gun_barrel_index(self, value):
         self._gun_barrel_index = value
+
+    @property
+    def cumoil_bblperft(self):
+        return self._cumoil_bblperft
+    
+    @cumoil_bblperft.setter
+    def cumoil_bblperft(self, value):
+        self._cumoil_bblperft = value
+
+    @property
+    def pct_of_group_cumoil_bblperft(self):
+        return self._pct_of_group_cumoil_bblperft
+    
+    @pct_of_group_cumoil_bblperft.setter
+    def pct_of_group_cumoil_bblperft(self, value):
+        self._pct_of_group_cumoil_bblperft = value
