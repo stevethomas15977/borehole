@@ -35,6 +35,7 @@ class Context():
         self._max_distance_threshold: int = os.getenv("MAX_DISTANCE_THRESHOLD")
         self._hypotenuse_distance_threshold: int = os.getenv("HYPOTENUSE_DISTANCE_THRESHOLD")
         self._depth_distance_threshold: int = int(os.getenv("DEPTH_DISTANCE_THRESHOLD"))
+        self._pct_group_cum_oil_greater_than_threshold: float = float(os.getenv("PCT_GROUP_CUM_OIL_GREATER_THAN_THRESHOLD"))
 
         self._tx_abstract_column = os.getenv("TX_ABSTRACT_COLUMN")
         self._nm_section_column = os.getenv("NM_SECTION_COLUMN")
@@ -232,6 +233,16 @@ class Context():
         if depth_distance_threshold == None:
             raise ValueError("DEPTH_DISTANCE_THRESHOLD environment variable not set.")
         self._depth_distance_threshold = depth_distance_threshold
+        
+    @property
+    def pct_group_cum_oil_greater_than_threshold(self):
+        return self._pct_group_cum_oil_greater_than_threshold
+    
+    @pct_group_cum_oil_greater_than_threshold.setter
+    def pct_group_cum_oil_greater_than_threshold(self, pct_group_cum_oil_greater_than_threshold):
+        if pct_group_cum_oil_greater_than_threshold == None:
+            raise ValueError("PCT_GROUP_CUM_OIL_GREATER_THAN_THRESHOLD environment variable not set.")
+        self._pct_group_cum_oil_greater_than_threshold = pct_group_cum_oil_greater_than_threshold
         
     @property
     def username(self):

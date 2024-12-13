@@ -266,6 +266,7 @@ class AFEDB:
                 section TEXT,
                 cumlative_oil INTEGER,
                 last_producing_month TEXT,
+                cumoil_bblper1000ft INTEGER,
                 cumoil_bblperft INTEGER
             ); """
 
@@ -300,8 +301,9 @@ class AFEDB:
             section,
             cumlative_oil,
             last_producing_month,
+            cumoil_bblper1000ft,
             cumoil_bblperft)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) 
             """
 
         SELECT_WELLS = """SELECT * FROM well ORDER BY name DESC"""
@@ -405,7 +407,8 @@ class AFEDB:
                 target_well_spacing_gun_barrel_plot_flag TEXT,
                 gun_barrel_index INTEGER,
                 cumoil_bblperft INTEGER,
-                pct_of_group_cumoil_bblperft REAL
+                pct_of_group_cumoil_bblperft REAL,
+                pct_of_group_cumoil_bblperft_greater_than Text
             ); """
 
         DROP_ANALYSIS_TABLE = """DROP TABLE IF EXISTS analysis"""
@@ -465,7 +468,8 @@ class AFEDB:
             target_well_spacing_gun_barrel_plot_flag,
             gun_barrel_index,
             cumoil_bblperft,
-            pct_of_group_cumoil_bblperft)
+            pct_of_group_cumoil_bblperft,
+            pct_of_group_cumoil_bblperft_greater_than)
             VALUES (?, ?, ?, ?, ?, 
                     ?, ?, ?, ?, ?, 
                     ?, ?, ?, ?, ?, 
@@ -476,7 +480,7 @@ class AFEDB:
                     ?, ?, ?, ?, ?,
                     ?, ?, ?, ?, ?,
                     ?, ?, ?, ?, ?,
-                    ?, ?, ?, ?)
+                    ?, ?, ?, ?, ?)
             """
         UPDATE_ANALYSIS = """
             UPDATE analysis
@@ -532,7 +536,8 @@ class AFEDB:
             target_well_spacing_gun_barrel_plot_flag = ?,
             gun_barrel_index = ?,
             cumoil_bblperft = ?,
-            pct_of_group_cumoil_bblperft = ?
+            pct_of_group_cumoil_bblperft = ?,
+            pct_of_group_cumoil_bblperft_greater_than = ?
             WHERE api = ?
         """
         UPDATE_ANALYSIS_SET_TARGET_WELL_SPACING_GUN_BARREL_PLOT_FLAG_NULL = """ UPDATE analysis SET target_well_spacing_gun_barrel_plot_flag = NULL"""

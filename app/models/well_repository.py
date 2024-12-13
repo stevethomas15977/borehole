@@ -49,6 +49,7 @@ class WellRepository:
                             well.section,
                             well.cumlative_oil,
                             well.last_producing_month,
+                            well.cumoil_bblper1000ft,
                             well.cumoil_bblperft
                         ),
                     )

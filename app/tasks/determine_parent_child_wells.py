@@ -59,6 +59,8 @@ class DetermineParentChildWells(Task):
                                     well_group = well_group_service.get_by_name(analysis.group_id)
                                     if well_group is not None and well_group.avg_cumoil_per_ft > 0:
                                         analysis.pct_of_group_cumoil_bblperft = round((analysis.cumoil_bblperft / well_group.avg_cumoil_per_ft) * 100, 2)
+                                        if analysis.pct_of_group_cumoil_bblperft > self.context.pct_group_cum_oil_greater_than_threshold:
+                                            analysis.pct_of_group_cumoil_bblperft_greater_than = "Yes"
 
                                 parentchildren.append(parentchild)
                                 analysis_service.update(analysis)

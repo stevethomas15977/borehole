@@ -76,7 +76,8 @@ class AnalysisRepository:
                             analysis.target_well_spacing_gun_barrel_plot_flag,
                             analysis.gun_barrel_index,
                             analysis.cumoil_bblperft,
-                            analysis.pct_of_group_cumoil_bblperft
+                            analysis.pct_of_group_cumoil_bblperft,
+                            analysis.pct_of_group_cumoil_bblperft_greater_than
                         ),
                     )
                 except IntegrityError as e:
@@ -147,7 +148,8 @@ class AnalysisRepository:
                     analysis.target_well_spacing_gun_barrel_plot_flag,
                     analysis.gun_barrel_index,
                     analysis.cumoil_bblperft,
-                    analysis.pct_of_group_cumoil_bblperft
+                    analysis.pct_of_group_cumoil_bblperft,
+                    analysis.pct_of_group_cumoil_bblperft_greater_than
                 ),
             )
             self.connection.commit()
@@ -221,6 +223,7 @@ class AnalysisRepository:
                     analysis.gun_barrel_index,
                     analysis.cumoil_bblperft,
                     analysis.pct_of_group_cumoil_bblperft,
+                    analysis.pct_of_group_cumoil_bblperft_greater_than,
                     analysis.api
                 ),
             )
