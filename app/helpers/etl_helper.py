@@ -3,7 +3,7 @@ from datetime import datetime
 from logging import error, info
 import stat
 
-from pandas import read_excel, isna
+from pandas import read_excel, isna, notna
 
 from models import Survey, Well
 from services import SurveyService, WellService
@@ -64,9 +64,17 @@ def load_wells(db_path:str , file_path: str) -> None:
             range = row["Range"] if state == "NM" else None
             section = str(int(row["Section"])).zfill(2) if state in ["TX", "NM"] else None
             cumlative_oil = row["CumOil_BBL"]   
-            last_producing_month = str(row["LastProducingMonth"].strftime("%Y-%m-%d"))
-            cumoil_bblper1000ft = row["CumOil_BBLPer1000FT"]
-            cumoil_bblperft = int(row["CumOil_BBLPer1000FT"]/1000)
+            if notna(row["LastProducingMonth"]):
+                last_producing_month = str(row["LastProducingMonth"].strftime("%Y-%m-%d"))
+            else:
+                last_producing_month = None
+            if isna(row["CumOil_BBLPer1000FT"]) or row["CumOil_BBLPer1000FT"] is None:
+                cumoil_bblper1000ft = None
+                cumoil_bblperft = None
+            else:
+                cumoil_bblper1000ft = row["CumOil_BBLPer1000FT"]
+                cumoil_bblperft = int(row["CumOil_BBLPer1000FT"]/1000)
+
             well = Well(
                 api=api,
                 name=well_name,

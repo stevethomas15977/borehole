@@ -339,7 +339,7 @@ class AFEDB:
         DROP_SURVEY_TABLE = """DROP TABLE IF EXISTS survey"""
         
         INSERT_SURVEY = """
-            INSERT INTO survey (api, station, md, inclination, azimuth, latitude, longitude, grid_x, grid_y, subsurface_depth) 
+            INSERT OR IGNORE INTO survey (api, station, md, inclination, azimuth, latitude, longitude, grid_x, grid_y, subsurface_depth) 
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """
         GET_SURVEYS_BY_API = (
