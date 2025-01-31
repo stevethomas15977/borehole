@@ -101,7 +101,7 @@ class ETLTargetWellInformation(Task):
                     raise ValueError(f"Logs landing zone must be provided")
                 
                 # Ensure perforation interval is provided
-                if target_well.surveys_preforated_interval_ft is None:
+                if target_well.surveys_preforated_interval_ft is None or target_well.surveys_preforated_interval_ft <= 0:
                     raise ValueError(f"Perforation interval must be provided")
                 
                 # Ensure subsurface depth is provided

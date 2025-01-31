@@ -128,7 +128,7 @@ class CreateCrossPlot(Task):
                     continue
 
                 if "11-111" in xyz_distance.target_api:
-                    color = "orange"
+                    color = "green"
                     alpha = 0.90
                     zorder = 5
                     marker = 's'  # 's' for square
@@ -208,11 +208,14 @@ class CreateCrossPlot(Task):
             ]
             data_worksheet.append(headers)
 
+            target_well_rows  = [int]
+
             for i, xyz_distance in enumerate(xyz_distances, start=1):
                 analysis = analysis_service.get_by_api(xyz_distance.target_api)
                 if analysis.subsurface_depth < y_min or analysis.subsurface_depth > y_max:
                     continue
                 if "11-111" in xyz_distance.target_api:
+                    target_well_rows.append(i)
                     target_well = target_well_information_service.get_by_name(analysis.name)
                     if target_well:
                         api = target_well.api if target_well.api else "Target Well"
@@ -231,6 +234,15 @@ class CreateCrossPlot(Task):
             # Adjust the column widths
             self.auto_adjust_column_widths(data_worksheet, headers)
 
+            # Adjust background color for target well rows
+            for target_well_row in target_well_rows:
+                for row in data_worksheet.iter_rows():
+                    if row[0].internal_value == target_well_row:
+                        row_number = row[0].row
+                        cell = data_worksheet[f"A{row_number}"]
+                        cell.fill = PatternFill(start_color="008000", end_color="008000", fill_type="solid")
+
+                    
             # Center align all cellschild_well_summary_worksheet
             for row in data_worksheet.iter_rows():
                 for cell in row:
