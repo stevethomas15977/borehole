@@ -583,7 +583,7 @@ class AFEDB:
         DROP_ADJACENT_TABLE = """DROP TABLE IF EXISTS adjacent"""
 
         INSERT_ADJACENT = """
-            INSERT INTO adjacent (
+            INSERT or IGNORE INTO adjacent (
             reference_api,
             reference_name,
             target_api,
