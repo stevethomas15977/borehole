@@ -50,7 +50,7 @@ resource "aws_lightsail_instance" "instance" {
         export APP_ROOT="/home/ubuntu"
         export AFE_PATH=$APP_ROOT/afe
         export APP_PATH=$AFE_PATH/app
-        export S3_BUCKET_NAME="prod-afe-plss"
+        export S3_BUCKET_NAME="prod-borehole"
         export S3_FOLDER_NAME="geojson"
         export GEOJSON_PATH=$AFE_PATH/$S3_FOLDER_NAME
         export PROJECTS_PATH=$AFE_PATH/projects
