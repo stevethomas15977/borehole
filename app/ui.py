@@ -15,7 +15,6 @@ from context import Context
 from workflow_manager import WorkflowManager
 from datetime import datetime
 import shutil
-import subprocess
 
 context = Context()
 
@@ -51,8 +50,6 @@ def run_workflow(workflow_manager: WorkflowManager):
     try:
         workflow_manager.base_workflow()
         workflow_manager.offset_well_identification_workflow()
-        if context.target_well_information_file:
-            workflow_manager.gun_barrel_workflow()
     except Exception as e:
         print(f"Error occurred during workflow: {e}")
 
@@ -66,7 +63,6 @@ def upload():
         project = request.form['project']
         well_data = request.files['well-data']
         survey_data = request.files['survey-data']
-        target_well_information = request.files['target-well-information']
 
         if project == '':
             flash('Project name is required', 'error')
@@ -99,12 +95,6 @@ def upload():
         well_data.save(context.well_file)
         survey_data.save(context.survey_file)
 
-        if target_well_information.filename:
-            context.target_well_information_path = os.path.join(context.project_path, 'target_well_information')
-            os.makedirs(context.target_well_information_path, exist_ok=True)    
-            context.target_well_information_file = os.path.join(context.target_well_information_path, secure_filename(target_well_information.filename))
-            target_well_information.save(context.target_well_information_file)
-
         for state in ['RUNNING', 'COMPLETED', 'ERROR']:
             if os.path.exists(os.path.join(context.project_path, state)):
                 os.remove(os.path.join(context.project_path, state))
@@ -136,16 +126,6 @@ def upload():
 def request_entity_too_large(error):
     flash('File Too Large', 'error')
     return redirect(url_for('index'))
-
-def plss_download():
-    pass
-
-with app.app_context():
-    S3_BUCKET_NAME = os.getenv('PLSS_BUCKET')
-    S3_FOLDER_NAME = "geojson"
-    command = f"s3 sync s3://{S3_BUCKET_NAME}/{S3_FOLDER_NAME} {context.geojson_path}"
-    aws_cli_command = f"aws {command} "
-    result = subprocess.run(aws_cli_command, shell=True, capture_output=True, text=True)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8080)

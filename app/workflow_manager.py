@@ -23,8 +23,6 @@ class WorkflowManager:
         workgroup = WorkflowGroup("AFE Project Initiation Workflow", self._context, self._factory)
         workgroup.add_task(TASKS.CREATE_DATABASE.value)
         workgroup.add_task(TASKS.LOAD_LOOKUP_TABLES.value)
-        if self._context.target_well_information_file:
-            workgroup.add_task(TASKS.VALIDATE_TARGET_WELL_INFORMATION.value)
             
         workgroup.run()
 
@@ -33,11 +31,6 @@ class WorkflowManager:
         workgroup.add_task(TASKS.LOAD_WELL_DATA.value)
         workgroup.add_task(TASKS.LOAD_SURVEY_DATA.value)
         workgroup.add_task(TASKS.ETL_WELL.value)
-        if self._context.target_well_information_file:
-            workgroup.add_task(TASKS.LOAD_TARGET_WELL_INFORMATION.value)
-            workgroup.add_task(TASKS.ETL_TARGET_WELL_INFORMATION.value)
-            workgroup.add_task(TASKS.CREATE_TARGET_WELL_ANALYSIS.value)
-            workgroup.add_task(TASKS.CREATE_SIMULATED_WELL.value)
         workgroup.add_task(TASKS.CALCULATE_XYZ_DISTANCE.value)
         workgroup.add_task(TASKS.CALCULATE_LATITUDE_LONGITUDE_DISTANCE.value)
         workgroup.run()
@@ -56,18 +49,6 @@ class WorkflowManager:
         workgroup.add_task(TASKS.CREATE_OFFSET_WELL_IDENTIFICATION_EXCEL.value)
         workgroup.run()
 
-    def gun_barrel_workflow(self):
-        workgroup = WorkflowGroup("Well Spacing Gun Barrel Plot Workflow", self._context, self._factory)
-        workgroup.add_task(TASKS.GUN_BARREL_PLOT_WORKFLOW_DATABASE_MANAGEMENT.value)
-        workgroup.add_task(TASKS.DETERMINE_WELL_SPACING_GUN_BARREL_PLOT_WELLS.value)
-        workgroup.add_task(TASKS.CALCULATE_WELL_OVERLAP_PERCENTAGE.value)
-        workgroup.add_task(TASKS.ENRICH_GUN_BARREL.value)
-        workgroup.add_task(TASKS.CREATE_GUN_BARREL_PLOT.value)
-        workgroup.add_task(TASKS.CREATE_CROSS_PLOT.value)
-        workgroup.add_task(TASKS.CREATE_EXCEL_NATIVE_GUN_BARREL_PLOT.value)
-        if self._context.target_well_information_file:                        
-            workgroup.run()
-
     @property
     def context(self):
         return self._context
@@ -83,4 +64,3 @@ if __name__ == "__main__":
     workflow_manager.project_initiation_workflow()
     workflow_manager.base_workflow()
     workflow_manager.offset_well_identification_workflow()
-    workflow_manager.gun_barrel_workflow()

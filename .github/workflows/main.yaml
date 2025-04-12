@@ -3,14 +3,6 @@ name: Deploy AFE Application
 on:
   workflow_dispatch:
     inputs:
-      environment:
-        description: 'Select the environment to deploy to'
-        required: true
-        default: 'dev'
-        type: choice
-        options:
-          - dev
-          - prod
       command:
         description: 'Select the command to run'
         required: true
@@ -19,10 +11,31 @@ on:
         options:
           - plan
           - apply
-          - destroy
-
+      aws_region:
+        description: 'Specify the AWS Region'
+        required: true
+        default: 'us-east-1'
+        type: string
+      aws_acccess_key_id:
+        description: 'Specify the AWS Access Key ID'
+        required: true
+        default: 'replace_with_your_access_key_id'
+        type: string
+      aws_secret_access_key:
+        description: 'Specify the AWS Secret Access Key'
+        required: true
+        default: 'replace_with_your_secret_access_key'
+        type: string
+      app_secret:
+        description: 'Specify the App Secret'
+        required: true
+        default: 'replace_with_your_app_secret'
+        type: string
 env:
-  AWS_DEFAULT_REGION: ${{ vars.AWS_DEFAULT_REGION }}
+  AWS_DEFAULT_REGION: ${{ github.event.inputs.aws_region }}
+  AWS_ACCESS_KEY_ID: ${{ github.event.inputs.aws_acccess_key_id }}
+  AWS_SECRET_ACCESS_KEY: ${{ github.event.inputs.aws_secret_access_key }}
+  APP_SECRET: ${{ github.event.inputs.app_secret }}
 
 jobs:
   deploy:
@@ -33,18 +46,6 @@ jobs:
         id: set_env_vars
         run: |
           echo "TF_VAR_ghpat=${{ secrets.AFE_GH_PAT }}" >> $GITHUB_ENV
-          echo "TF_VAR_appsecret=${{ secrets.APP_SECRET }}" >> $GITHUB_ENV
-          if [ "${{ github.event.inputs.environment }}" == "prod" ]; then
-            echo "AWS_ACCESS_KEY_ID=${{ vars.PROD_AWS_ACCESS_KEY_ID }}" >> $GITHUB_ENV
-            echo "AWS_SECRET_ACCESS_KEY=${{ secrets.PROD_AWS_SECRET_ACCESS_KEY }}" >> $GITHUB_ENV
-            echo "TF_VAR_env=afe-prod" >> $GITHUB_ENV
-            echo "TF_VAR_s3_bucket=prod-borehole" >> $GITHUB_ENV
-          else
-            echo "AWS_ACCESS_KEY_ID=${{ vars.DEV_AWS_ACCESS_KEY_ID }}" >> $GITHUB_ENV
-            echo "AWS_SECRET_ACCESS_KEY=${{ secrets.DEV_AWS_SECRET_ACCESS_KEY }}" >> $GITHUB_ENV
-            echo "TF_VAR_env=afe-dev" >> $GITHUB_ENV
-            echo "TF_VAR_s3_bucket=afe-plss-dev" >> $GITHUB_ENV
-          fi
 
       - name: Checkout
         uses: actions/checkout@v4
@@ -52,19 +53,10 @@ jobs:
       - name: Run Terraform commands
         run: |
           cd terraform
-
-          if [ "${{ github.event.inputs.environment }}" == "prod" ]; then
-            terraform init -backend-config=backend-prod.tfvars
-          else
-            terraform init -backend-config=backend-dev.tfvars
-          fi
           
           if [ "${{ github.event.inputs.command }}" == "plan" ]; then
             terraform plan 
           fi
           if [ "${{ github.event.inputs.command }}" == "apply" ]; then
             terraform apply -auto-approve
-          fi
-          if [ "${{ github.event.inputs.command }}" == "destroy" ]; then
-            terraform destroy -auto-approve
           fi
