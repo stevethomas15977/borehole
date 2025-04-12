@@ -71,7 +71,7 @@ resource "aws_lightsail_instance" "instance" {
         cp -R /tmp/afe/app/* $APP_PATH
   
         # Download geojson files from S3
-        aws s3 sync s3://$S3_BUCKET_NAME/$S3_FOLDER_NAME $GEOJSON_PATH --profile lightsail
+        aws s3 sync s3://$S3_BUCKET_NAME/$S3_FOLDER_NAME geojson/$GEOJSON_PATH --profile lightsail
 
         # Adjust permissions
         chown -R ubuntu:ubuntu $AFE_PATH
