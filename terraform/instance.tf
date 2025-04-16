@@ -22,7 +22,6 @@ resource "aws_lightsail_instance" "instance" {
         # Set up the environment variables
         export GH_PAT="${var.ghpat}"
         export APP_SECRET="${var.appsecret}"
-        export ENV="${var.env}"
         export APP="borehole"
         export APP_ROOT="/home/ubuntu"
         export AFE_PATH=$APP_ROOT/afe
@@ -53,7 +52,6 @@ resource "aws_lightsail_instance" "instance" {
         sh -c "cat > $APP_PATH/.env" <<EOG
         PYTHONPATH="$PYTHONPATH:models:helpers:services:database"
         VERSION="1.7.5.7"
-        ENV="$ENV"
         APP="$APP"
         APP_ROOT="$APP_ROOT"
         AFE_PATH=$AFE_PATH

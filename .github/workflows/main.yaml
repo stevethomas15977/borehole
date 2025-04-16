@@ -45,7 +45,8 @@ jobs:
       - name: Set environment variables based on input
         id: set_env_vars
         run: |
-          echo "TF_VAR_ghpat=${{ secrets.AFE_GH_PAT }}" >> $GITHUB_ENV
+          echo "TF_VAR_ghpat=${{ secrets.BOREHOLE_GH_PAT }}" >> $GITHUB_ENV
+          echo "TF_VAR_appsecret=${{ github.event.inputs.app_secret }}" >> $GITHUB_ENV
 
       - name: Checkout
         uses: actions/checkout@v4
