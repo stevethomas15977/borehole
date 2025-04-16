@@ -55,6 +55,9 @@ jobs:
         run: |
           cd terraform
           
+          # Initialize Terraform
+          terraform init
+          
           if [ "${{ github.event.inputs.command }}" == "plan" ]; then
             terraform plan 
           fi
