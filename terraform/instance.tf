@@ -5,7 +5,7 @@
 
 # Lightsail Instance
 resource "aws_lightsail_instance" "instance" {
-  name                  = "${var.app}-instance"
+  name                  = "${var.app}-instance-2"
     availability_zone   = "us-east-1a"
     blueprint_id        = "ubuntu_24_04"
     bundle_id           = "medium_3_0" 
