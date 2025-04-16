@@ -7,7 +7,7 @@ variable "region" {
 variable "app" {
     description = "Application name"
     type        = string
-     default     = "afe"
+     default     = "borehole"
 }
 
 variable "ghpat" {
@@ -17,10 +17,5 @@ variable "ghpat" {
 
 variable "appsecret" {
     description = "Application secret"
-    type        = string
-}
-
-variable "env" {
-    description = "Environment"
     type        = string
 }
