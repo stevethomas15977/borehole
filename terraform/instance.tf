@@ -22,9 +22,9 @@ resource "aws_lightsail_instance" "instance" {
         # Set up the environment variables
         export GH_PAT="${var.ghpat}"
         export APP_SECRET="${var.appsecret}"
-        export APP="borehole"
+        export APP="${var.app}"
         export APP_ROOT="/home/ubuntu"
-        export AFE_PATH=$APP_ROOT/afe
+        export AFE_PATH=$APP_ROOT/$APP
         export APP_PATH=$AFE_PATH/app
         export PROJECTS_PATH=$AFE_PATH/projects
 
