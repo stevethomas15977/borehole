@@ -34,8 +34,8 @@ resource "aws_lightsail_instance" "instance" {
         mkdir -p $PROJECTS_PATH
 
         # Clone the GitHub repository
-        mkdir -p /tmp/afe
-        cd /tmp/afe
+        mkdir -p /tmp/borehole
+        cd /tmp/borehole
         git clone https://$GH_PAT@github.com/stevethomas15977/borehole.git 
         git checkout main
 
